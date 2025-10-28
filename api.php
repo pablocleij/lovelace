@@ -50,6 +50,47 @@ function buildContext(){
   return $context;
 }
 
+// Validation layer: validate data against schema
+function validateSchema($schemaName, $data){
+  $schemaPath = "cms/schemas/{$schemaName}.json";
+  if(!file_exists($schemaPath)) return true; // No schema = no validation
+
+  $schema = json_decode(file_get_contents($schemaPath), true);
+
+  // Handle schema inheritance
+  if(isset($schema['extends'])){
+    $parentPath = "cms/schemas/{$schema['extends']}.json";
+    if(file_exists($parentPath)){
+      $parent = json_decode(file_get_contents($parentPath), true);
+      $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields']);
+    }
+  }
+
+  // Validate all required fields are present
+  foreach($schema['fields'] as $f=>$type){
+    if(!isset($data[$f])){
+      throw new Exception("Missing required field: $f");
+    }
+
+    // Basic type validation
+    $value = $data[$f];
+    if($type == 'string' && !is_string($value)){
+      throw new Exception("Field $f must be a string");
+    }
+    if($type == 'number' && !is_numeric($value)){
+      throw new Exception("Field $f must be a number");
+    }
+    if($type == 'boolean' && !is_bool($value)){
+      throw new Exception("Field $f must be a boolean");
+    }
+    if($type == 'list' && !is_array($value)){
+      throw new Exception("Field $f must be an array");
+    }
+  }
+
+  return true;
+}
+
 // Auto-generate forms for missing required schema fields
 function validateAndGenerateForm($schemaName, $data){
   $schemaPath = "cms/schemas/{$schemaName}.json";
@@ -117,6 +158,21 @@ foreach($response['event']['patches'] ?? [] as $patch){
     $response['requires_confirmation'] = true;
   }
 
+  // Validation layer: validate AI-generated data before writing
+  if(($patch['op']=='create_file' || $patch['op']=='create_collection_item') && isset($patch['schema'])){
+    try {
+      validateSchema($patch['schema'], $patch['value']);
+    } catch (Exception $e) {
+      // Validation failed - generate form or return error
+      $response['error'] = $e->getMessage();
+      $generatedForm = validateAndGenerateForm($patch['schema'], $patch['value']);
+      if($generatedForm){
+        $response['form'] = array_merge($response['form'] ?? [], $generatedForm);
+      }
+      continue; // Skip writing this patch
+    }
+  }
+
   // Auto-generate forms for collection items with missing schema fields
   if($patch['op']=='create_file' && isset($patch['schema'])){
     $generatedForm = validateAndGenerateForm($patch['schema'], $patch['value']);
@@ -140,4 +196,9 @@ if($policy['suggest_improvements']){
   $response['suggestions'] = array_merge($response['suggestions'] ?? [], $suggest);
 }
 
-echo json_encode(['message'=>$response['message'],'form'=>$response['form']??null,'suggestions'=>$response['suggestions']??[]]);
+echo json_encode([
+  'message'=>$response['message'],
+  'form'=>$response['form']??null,
+  'suggestions'=>$response['suggestions']??[],
+  'error'=>$response['error']??null
+]);
