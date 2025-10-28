@@ -58,6 +58,14 @@ async function showGreeting(){
 // Show greeting when page loads
 showGreeting();
 
+// Export button handler
+const exportBtn = document.getElementById('export-btn');
+if(exportBtn){
+  exportBtn.addEventListener('click', () => {
+    window.location.href = 'export.php';
+  });
+}
+
 input.addEventListener('keydown', async (e) => {
   if(e.key === 'Enter'){
     const msg = input.value;
