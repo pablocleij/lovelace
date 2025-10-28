@@ -1,0 +1,7 @@
+{
+  "extends":"base_post",
+  "fields":{
+    "category":"string",
+    "tags":"list"
+  }
+}

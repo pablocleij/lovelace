@@ -1,4 +1,21 @@
 <?php
+
+// Schema inheritance - merge parent schema fields
+function mergeSchema($schemaName){
+  $schemaPath = "cms/schemas/{$schemaName}.json";
+  if(!file_exists($schemaPath)) return ['fields'=>[]];
+
+  $schema = json_decode(file_get_contents($schemaPath), true);
+
+  // If schema extends another, merge parent fields
+  if(isset($schema['extends'])){
+    $parent = mergeSchema($schema['extends']);
+    $schema['fields'] = array_merge($parent['fields'], $schema['fields']);
+  }
+
+  return $schema;
+}
+
 $events = glob('cms/events/*.json');
 $site = [];
 // $pubKey = load from cms/config/keypair.pub

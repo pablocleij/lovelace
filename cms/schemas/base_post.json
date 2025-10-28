@@ -1,0 +1,9 @@
+{
+  "name":"base_post",
+  "fields":{
+    "title":"string",
+    "content":"string",
+    "author":"string",
+    "date":"date"
+  }
+}
