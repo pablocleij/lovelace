@@ -113,6 +113,37 @@ function buildContext(){
     $context .= "Response: Create home, about, contact pages with appropriate sections\n\n";
   }
 
+  $context .= "COLLECTION BROWSING:\n";
+  $context .= "When user asks to 'show collections', 'list collections', or 'what collections exist':\n";
+  $context .= "1. List all collections with item counts and schema status\n";
+  $context .= "2. Show which collections have schemas and which don't\n";
+  $context .= "3. Suggest creating missing schemas or adding content to empty collections\n";
+  $context .= "When user asks about specific collection (e.g., 'show me posts'):\n";
+  $context .= "1. List all items in that collection\n";
+  $context .= "2. Show key fields from each item (title, name, etc.)\n";
+  $context .= "3. Offer to edit, add, or delete items\n\n";
+
+  $context .= "AI CONTENT GENERATION:\n";
+  $context .= "You can generate placeholder content for any field type:\n";
+  $context .= "- Titles: Create engaging, contextual headlines\n";
+  $context .= "- Descriptions: Write 2-3 sentence summaries\n";
+  $context .= "- Content: Generate full paragraphs with proper structure\n";
+  $context .= "- Lists: Create 3-5 relevant bullet points\n";
+  $context .= "When user asks to 'generate content' or 'fill in placeholders':\n";
+  $context .= "1. Analyze the context and purpose\n";
+  $context .= "2. Generate appropriate, professional content\n";
+  $context .= "3. Match the tone to the site type (business, blog, portfolio, etc.)\n\n";
+
+  $context .= "ERROR RECOVERY:\n";
+  $context .= "When operations fail or data is invalid:\n";
+  $context .= "1. Explain what went wrong in simple terms\n";
+  $context .= "2. Suggest specific fixes (e.g., 'Create the collection first')\n";
+  $context .= "3. Offer to automatically fix common issues\n";
+  $context .= "4. For missing schemas: Offer to infer from content\n";
+  $context .= "5. For invalid JSON: Offer to validate and correct\n";
+  $context .= "6. For missing files: Offer to create with defaults\n";
+  $context .= "Always provide a path forward, never just report errors.\n\n";
+
   $context .= "SUGGESTION EXAMPLES:\n";
   $context .= "- After creating homepage: Suggest 'Add an about page' or 'Create a blog section'\n";
   $context .= "- After adding blog: Suggest 'Create your first blog post' or 'Add categories'\n";
