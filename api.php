@@ -14,4 +14,15 @@ function writeEvent($event){
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
-echo json_encode(['message'=>"Echo: ".$data['message']]);
+
+$payload = [
+  "model"=>"gpt-4o",
+  "messages"=>[["role"=>"system","content"=>"You are lovelace..."],["role"=>"user","content"=>$data['message']]]
+];
+$ch = curl_init("https://api.openai.com/v1/chat/completions");
+curl_setopt($ch,CURLOPT_HTTPHEADER,["Authorization: Bearer $apiKey","Content-Type: application/json"]);
+curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+curl_setopt($ch,CURLOPT_POSTFIELDS,json_encode($payload));
+$res=json_decode(curl_exec($ch),true); curl_close($ch);
+
+echo json_encode(['message'=>$res['choices'][0]['message']['content']]);
