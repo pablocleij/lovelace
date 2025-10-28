@@ -1,1 +1,5 @@
-{"provider":"openai","key":"YOUR_KEY_HERE"}
+{
+  "provider": "openai",
+  "key": "YOUR_KEY_HERE",
+  "model": "gpt-4o"
+}

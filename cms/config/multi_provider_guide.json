@@ -1,0 +1,92 @@
+{
+  "description": "Guide for using multiple LLM providers with BYOK (Bring Your Own Key)",
+  "supported_providers": {
+    "openai": {
+      "name": "OpenAI",
+      "api_endpoint": "https://api.openai.com/v1/chat/completions",
+      "recommended_models": ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
+      "key_location": "https://platform.openai.com/api-keys",
+      "example_config": {
+        "provider": "openai",
+        "key": "sk-...",
+        "model": "gpt-4o"
+      }
+    },
+    "claude": {
+      "name": "Anthropic Claude",
+      "api_endpoint": "https://api.anthropic.com/v1/messages",
+      "recommended_models": ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-sonnet-20240229"],
+      "key_location": "https://console.anthropic.com/settings/keys",
+      "example_config": {
+        "provider": "claude",
+        "key": "sk-ant-...",
+        "model": "claude-3-5-sonnet-20241022"
+      }
+    }
+  },
+  "configuration_steps": [
+    "1. Open cms/config/api_key.json",
+    "2. Set 'provider' to either 'openai' or 'claude'",
+    "3. Add your API key in the 'key' field",
+    "4. Choose appropriate model for the provider",
+    "5. Save the file and reload the CMS"
+  ],
+  "how_it_works": {
+    "provider_detection": "api.php reads the provider field from api_key.json",
+    "dynamic_routing": "callLLM() function routes to provider-specific implementation",
+    "response_normalization": "All providers return plain text content in the same format",
+    "event_compatibility": "Event structure remains identical regardless of provider",
+    "replay_safety": "Events can be replayed even if provider changes later"
+  },
+  "provider_differences": {
+    "openai": {
+      "message_format": "Uses 'system' and 'user' roles in messages array",
+      "auth_header": "Authorization: Bearer {key}",
+      "response_path": "choices[0].message.content"
+    },
+    "claude": {
+      "message_format": "Uses separate 'system' parameter and 'messages' array",
+      "auth_header": "x-api-key: {key}",
+      "response_path": "content[0].text",
+      "requires_version": "anthropic-version: 2023-06-01 header"
+    }
+  },
+  "switching_providers": {
+    "instructions": "You can switch providers at any time by updating api_key.json",
+    "backward_compatible": "Existing events will continue to work",
+    "no_migration_needed": "Event format is provider-agnostic",
+    "example_switch": {
+      "from": {"provider": "openai", "key": "sk-...", "model": "gpt-4o"},
+      "to": {"provider": "claude", "key": "sk-ant-...", "model": "claude-3-5-sonnet-20241022"}
+    }
+  },
+  "cost_optimization": {
+    "strategy": "Choose provider based on cost/performance needs",
+    "openai_pricing": "gpt-3.5-turbo is cheapest, gpt-4o is most capable",
+    "claude_pricing": "claude-3-haiku is cheapest, claude-3-opus is most capable",
+    "recommendation": "Use faster/cheaper models for simple tasks, advanced models for complex content generation"
+  },
+  "extending_to_other_providers": {
+    "steps": [
+      "1. Add new function (e.g., callGemini, callMistral) following the same pattern",
+      "2. Add case to callLLM() switch statement",
+      "3. Return normalized plain text response",
+      "4. Update this guide with new provider details"
+    ],
+    "example_template": "function callNewProvider($apiKey, $model, $systemPrompt, $userMessage){ /* API call */ return $textResponse; }"
+  },
+  "benefits": [
+    "Vendor flexibility - not locked into single provider",
+    "Cost optimization - choose best price/performance ratio",
+    "Reliability - switch providers if one has downtime",
+    "Feature access - use best model for specific tasks",
+    "Privacy options - choose provider based on data policies",
+    "BYOK security - your keys, your control"
+  ],
+  "troubleshooting": {
+    "invalid_key": "Check that API key is valid for the selected provider",
+    "unsupported_model": "Verify model name matches provider's available models",
+    "api_errors": "Check curl error logs or enable error reporting in PHP",
+    "provider_not_found": "Ensure provider name exactly matches 'openai' or 'claude'"
+  }
+}

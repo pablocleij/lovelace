@@ -2,6 +2,8 @@
 header('Content-Type: application/json');
 $apiConfig = json_decode(file_get_contents('cms/config/api_key.json'), true);
 $apiKey = $apiConfig['key'];
+$provider = $apiConfig['provider'] ?? 'openai';
+$model = $apiConfig['model'] ?? 'gpt-4o';
 $policy = json_decode(file_get_contents('cms/config/policy.json'), true);
 
 // Build context from event history and site state
@@ -179,22 +181,68 @@ function writeEvent($event){
   file_put_contents('cms/logs/audit.log', date('c').' '.$event['instruction']."\n", FILE_APPEND);
 }
 
+// Provider-specific API call functions
+function callOpenAI($apiKey, $model, $systemPrompt, $userMessage){
+  $payload = [
+    "model" => $model,
+    "messages" => [
+      ["role" => "system", "content" => $systemPrompt],
+      ["role" => "user", "content" => $userMessage]
+    ]
+  ];
+  $ch = curl_init("https://api.openai.com/v1/chat/completions");
+  curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $apiKey", "Content-Type: application/json"]);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  $res = json_decode(curl_exec($ch), true);
+  curl_close($ch);
+
+  return $res['choices'][0]['message']['content'] ?? '';
+}
+
+function callClaude($apiKey, $model, $systemPrompt, $userMessage){
+  $payload = [
+    "model" => $model,
+    "max_tokens" => 4096,
+    "system" => $systemPrompt,
+    "messages" => [
+      ["role" => "user", "content" => $userMessage]
+    ]
+  ];
+  $ch = curl_init("https://api.anthropic.com/v1/messages");
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "x-api-key: $apiKey",
+    "anthropic-version: 2023-06-01",
+    "Content-Type: application/json"
+  ]);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  $res = json_decode(curl_exec($ch), true);
+  curl_close($ch);
+
+  // Claude returns content in a different format
+  return $res['content'][0]['text'] ?? '';
+}
+
+// Dynamic provider router
+function callLLM($provider, $apiKey, $model, $systemPrompt, $userMessage){
+  switch($provider){
+    case 'openai':
+      return callOpenAI($apiKey, $model, $systemPrompt, $userMessage);
+    case 'claude':
+      return callClaude($apiKey, $model, $systemPrompt, $userMessage);
+    default:
+      throw new Exception("Unsupported provider: $provider");
+  }
+}
+
 $data = json_decode(file_get_contents('php://input'), true);
 
 // Build proactive memory context from event history
 $contextPrompt = buildContext();
 
-$payload = [
-  "model"=>"gpt-4o",
-  "messages"=>[["role"=>"system","content"=>$contextPrompt],["role"=>"user","content"=>$data['message']]]
-];
-$ch = curl_init("https://api.openai.com/v1/chat/completions");
-curl_setopt($ch,CURLOPT_HTTPHEADER,["Authorization: Bearer $apiKey","Content-Type: application/json"]);
-curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-curl_setopt($ch,CURLOPT_POSTFIELDS,json_encode($payload));
-$res=json_decode(curl_exec($ch),true); curl_close($ch);
-
-$aiMessage = $res['choices'][0]['message']['content'];
+// Call the configured LLM provider
+$aiMessage = callLLM($provider, $apiKey, $model, $contextPrompt, $data['message']);
 $response = json_decode($aiMessage,true);
 
 // AI checks policy before applying patch
