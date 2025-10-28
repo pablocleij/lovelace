@@ -696,12 +696,27 @@ function callOpenAI($apiKey, $model, $systemPrompt, $userMessage){
       ["role" => "user", "content" => $userMessage]
     ]
   ];
-  $ch = curl_init("https://api.openai.com/v1/chat/completions");
-  curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $apiKey", "Content-Type: application/json"]);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  $res = json_decode(curl_exec($ch), true);
-  curl_close($ch);
+
+  // Use file_get_contents as fallback if curl not available
+  if(function_exists('curl_init')){
+    $ch = curl_init("https://api.openai.com/v1/chat/completions");
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $apiKey", "Content-Type: application/json"]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    $res = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+  } else {
+    // Fallback: use file_get_contents with stream context
+    $context = stream_context_create([
+      'http' => [
+        'method' => 'POST',
+        'header' => "Authorization: Bearer $apiKey\r\nContent-Type: application/json\r\n",
+        'content' => json_encode($payload)
+      ]
+    ]);
+    $response = file_get_contents("https://api.openai.com/v1/chat/completions", false, $context);
+    $res = json_decode($response, true);
+  }
 
   return $res['choices'][0]['message']['content'] ?? '';
 }
@@ -715,16 +730,31 @@ function callClaude($apiKey, $model, $systemPrompt, $userMessage){
       ["role" => "user", "content" => $userMessage]
     ]
   ];
-  $ch = curl_init("https://api.anthropic.com/v1/messages");
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "x-api-key: $apiKey",
-    "anthropic-version: 2023-06-01",
-    "Content-Type: application/json"
-  ]);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  $res = json_decode(curl_exec($ch), true);
-  curl_close($ch);
+
+  // Use file_get_contents as fallback if curl not available
+  if(function_exists('curl_init')){
+    $ch = curl_init("https://api.anthropic.com/v1/messages");
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "x-api-key: $apiKey",
+      "anthropic-version: 2023-06-01",
+      "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    $res = json_decode(curl_exec($ch), true);
+    curl_close($ch);
+  } else {
+    // Fallback: use file_get_contents with stream context
+    $context = stream_context_create([
+      'http' => [
+        'method' => 'POST',
+        'header' => "x-api-key: $apiKey\r\nanthropic-version: 2023-06-01\r\nContent-Type: application/json\r\n",
+        'content' => json_encode($payload)
+      ]
+    ]);
+    $response = file_get_contents("https://api.anthropic.com/v1/messages", false, $context);
+    $res = json_decode($response, true);
+  }
 
   // Claude returns content in a different format
   return $res['content'][0]['text'] ?? '';
