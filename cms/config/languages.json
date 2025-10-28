@@ -1,0 +1,11 @@
+{
+  "default": "en",
+  "supported": ["en", "nl", "es", "fr", "de"],
+  "labels": {
+    "en": "English",
+    "nl": "Nederlands",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch"
+  }
+}

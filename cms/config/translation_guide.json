@@ -1,0 +1,60 @@
+{
+  "description": "Guide for AI-powered automatic translation",
+  "file_naming": {
+    "pattern": "filename.{lang}.json",
+    "examples": [
+      "home.en.json - English version",
+      "home.nl.json - Dutch version",
+      "home.es.json - Spanish version",
+      "about.en.json - English about page",
+      "about.nl.json - Dutch about page"
+    ]
+  },
+  "translation_workflow": {
+    "steps": [
+      "1. User requests: 'Translate homepage to Dutch'",
+      "2. AI reads the source file (e.g., home.en.json)",
+      "3. AI translates all text content to target language",
+      "4. AI creates new file with language suffix (e.g., home.nl.json)",
+      "5. AI preserves structure, only translates user-visible text",
+      "6. AI writes event with create_file patch for the new language file"
+    ]
+  },
+  "what_to_translate": [
+    "title - Page/item titles",
+    "subtitle - Subheadings",
+    "content - Body text",
+    "desc/description - Descriptions",
+    "All user-visible text in sections"
+  ],
+  "what_not_to_translate": [
+    "type - Section types (hero, features, etc.)",
+    "collection - Collection references",
+    "limit - Numeric values",
+    "slug - URL slugs",
+    "Technical field names"
+  ],
+  "example_translation": {
+    "source_en": {
+      "title": "Home",
+      "sections": [
+        {
+          "type": "hero",
+          "title": "Welcome",
+          "subtitle": "Launch fast"
+        }
+      ]
+    },
+    "translated_nl": {
+      "title": "Home",
+      "sections": [
+        {
+          "type": "hero",
+          "title": "Welkom",
+          "subtitle": "Snel lanceren"
+        }
+      ]
+    }
+  },
+  "ai_translation_prompt": "When user requests translation, create a new file with language suffix, translate only user-visible text fields, preserve all structure and technical fields exactly as they are."
+}

@@ -1,12 +1,21 @@
 <?php
+// Multi-language support: detect language from query parameter or use default
+$langConfig = json_decode(file_get_contents('cms/config/languages.json'), true);
+$currentLang = $_GET['lang'] ?? $langConfig['default'];
+
+// Validate language is supported
+if(!in_array($currentLang, $langConfig['supported'])){
+  $currentLang = $langConfig['default'];
+}
+
 // Load theme configuration
 $theme = json_decode(file_get_contents('cms/config/theme.json'), true);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $currentLang ?>">
 <head>
   <meta charset="UTF-8">
-  <title>Preview</title>
+  <title>Preview - <?= $langConfig['labels'][$currentLang] ?? $currentLang ?></title>
   <style>
     :root {
       --color-primary: <?= $theme['colors']['primary'] ?>;
@@ -56,16 +65,53 @@ function resolveNested($data){
   return $data;
 }
 
-// Fetch items from a collection
+// Fetch items from a collection with multi-language support
 function fetchCollection($collectionName, $limit = null){
+  global $currentLang;
   $files = glob("cms/collections/{$collectionName}/*.json");
   $items = [];
+
+  // Group files by base name (without language suffix)
+  $filesByBase = [];
   foreach($files as $file){
-    $item = json_decode(file_get_contents($file), true);
-    // Resolve nested collection references
-    $item = resolveNested($item);
-    $items[] = $item;
+    $basename = basename($file, '.json');
+
+    // Check if file has language suffix (e.g., home.en.json)
+    if(preg_match('/\.([a-z]{2})$/', $basename, $matches)){
+      $lang = $matches[1];
+      $base = preg_replace('/\.[a-z]{2}$/', '', $basename);
+      $filesByBase[$base][$lang] = $file;
+    } else {
+      // Language-neutral file
+      $filesByBase[$basename]['neutral'] = $file;
+    }
   }
+
+  // Load items in current language or fallback
+  foreach($filesByBase as $base => $langFiles){
+    $fileToLoad = null;
+
+    // Try current language first
+    if(isset($langFiles[$currentLang])){
+      $fileToLoad = $langFiles[$currentLang];
+    }
+    // Fall back to neutral
+    elseif(isset($langFiles['neutral'])){
+      $fileToLoad = $langFiles['neutral'];
+    }
+    // Fall back to any available language
+    else{
+      $fileToLoad = reset($langFiles);
+    }
+
+    if($fileToLoad){
+      $item = json_decode(file_get_contents($fileToLoad), true);
+      // Resolve nested collection references
+      $item = resolveNested($item);
+      $items[] = $item;
+    }
+  }
+
   if($limit){
     $items = array_slice($items, 0, $limit);
   }
@@ -153,6 +199,15 @@ foreach($snap as $item){
     echo "<section><h1>{$item['title']}</h1></section>";
   }
 }
+
+// Language switcher
+echo '<div style="position:fixed;top:10px;right:10px;background:white;padding:8px;border:1px solid #ccc;border-radius:4px;">';
+echo '<strong>Language:</strong> ';
+foreach($langConfig['supported'] as $lang){
+  $active = $lang === $currentLang ? 'font-weight:bold;' : '';
+  echo "<a href='?lang={$lang}' style='margin:0 4px;{$active}'>{$langConfig['labels'][$lang]}</a>";
+}
+echo '</div>';
 ?>
 </body>
 </html>

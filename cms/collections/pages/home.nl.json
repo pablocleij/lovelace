@@ -1,0 +1,8 @@
+{
+  "title":"Home",
+  "sections":[
+    {"type":"hero","title":"Welkom","subtitle":"Snel lanceren"},
+    {"type":"features","items":[{"title":"Snel","desc":"Onmiddellijke installatie"},{"title":"AI-gestuurd","desc":"Proactief CMS"}]},
+    {"type":"recent_posts","collection":"posts","limit":3}
+  ]
+}
