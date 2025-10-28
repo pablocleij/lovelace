@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "title": "About",
+        "slug": "about"
+    },
+    {
+        "title": "Home",
+        "slug": "home.en"
+    },
+    {
+        "title": "Home",
+        "slug": "home.nl"
+    }
+]

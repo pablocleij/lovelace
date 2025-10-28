@@ -1,0 +1,139 @@
+[
+    {
+        "name": "Tech",
+        "posts": [
+            {
+                "id": "0001"
+            },
+            {
+                "id": "0002"
+            }
+        ]
+    },
+    {
+        "name": "category",
+        "fields": {
+            "name": "string",
+            "posts": "list"
+        }
+    },
+    {
+        "title": "About",
+        "sections": [
+            {
+                "type": "hero",
+                "title": "About Us",
+                "subtitle": "Learn more about our mission"
+            },
+            {
+                "type": "features",
+                "items": [
+                    {
+                        "title": "Our Story",
+                        "desc": "Founded in 2025"
+                    },
+                    {
+                        "title": "Our Team",
+                        "desc": "Passionate developers"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Home",
+        "sections": [
+            {
+                "type": "hero",
+                "title": "Welcome",
+                "subtitle": "Launch fast"
+            },
+            {
+                "type": "features",
+                "items": [
+                    {
+                        "title": "Fast",
+                        "desc": "Instant setup"
+                    },
+                    {
+                        "title": "AI-driven",
+                        "desc": "Proactive CMS"
+                    }
+                ]
+            },
+            {
+                "type": "recent_posts",
+                "collection": "posts",
+                "limit": 3
+            }
+        ],
+        "meta": {
+            "title": "lovelace - AI-Powered CMS",
+            "description": "A file-based, event-sourced CMS managed entirely through conversational AI. No database, no admin panel\u2014just natural language.",
+            "og_image": "\/assets\/images\/og-image.png",
+            "og_type": "website",
+            "keywords": "CMS, AI, conversational, event-sourcing, file-based",
+            "author": "lovelace"
+        }
+    },
+    {
+        "title": "Home",
+        "sections": [
+            {
+                "type": "hero",
+                "title": "Welkom",
+                "subtitle": "Snel lanceren"
+            },
+            {
+                "type": "features",
+                "items": [
+                    {
+                        "title": "Snel",
+                        "desc": "Onmiddellijke installatie"
+                    },
+                    {
+                        "title": "AI-gestuurd",
+                        "desc": "Proactief CMS"
+                    }
+                ]
+            },
+            {
+                "type": "recent_posts",
+                "collection": "posts",
+                "limit": 3
+            }
+        ]
+    },
+    {
+        "name": "page",
+        "fields": {
+            "title": "string",
+            "sections": "list",
+            "meta": "object"
+        },
+        "meta_schema": {
+            "title": "string",
+            "description": "string",
+            "og_image": "string",
+            "og_type": "string",
+            "keywords": "string",
+            "author": "string",
+            "canonical": "string"
+        }
+    },
+    {
+        "title": "Hello World",
+        "content": "First post content",
+        "author": "Pablo",
+        "date": "2025-10-28"
+    },
+    {
+        "name": "posts",
+        "fields": {
+            "title": "string",
+            "content": "string",
+            "author": "string",
+            "date": "date"
+        }
+    }
+]

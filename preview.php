@@ -1,4 +1,21 @@
 <?php
+// Initialize CMS if needed (ensure snapshot exists)
+if(!file_exists('cms/snapshots/latest.json')){
+  if(!file_exists('cms/snapshots')){
+    mkdir('cms/snapshots', 0777, true);
+  }
+
+  // Try to run replay to generate snapshot
+  if(file_exists('replay.php')){
+    include_once 'replay.php';
+  }
+
+  // If still no snapshot, create empty one
+  if(!file_exists('cms/snapshots/latest.json')){
+    file_put_contents('cms/snapshots/latest.json', json_encode([], JSON_PRETTY_PRINT));
+  }
+}
+
 // Multi-language support: detect language from query parameter or use default
 $langConfig = json_decode(file_get_contents('cms/config/languages.json'), true);
 $currentLang = $_GET['lang'] ?? $langConfig['default'];
