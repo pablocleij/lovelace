@@ -12,6 +12,9 @@ function writeEvent($event){
   $event['signature']=base64_encode(sodium_crypto_sign_detached(json_encode($event), $key));
   $id = str_pad(count(glob('cms/events/*.json'))+1,7,'0',STR_PAD_LEFT);
   file_put_contents("cms/events/$id.json", json_encode($event,JSON_PRETTY_PRINT));
+
+  // Event audit log
+  file_put_contents('cms/logs/audit.log', date('c').' '.$event['instruction']."\n", FILE_APPEND);
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
