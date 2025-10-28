@@ -1,23 +1,69 @@
 <?php
+// Suppress PHP warnings/notices to ensure clean JSON output
+error_reporting(E_ERROR | E_PARSE);
+ini_set('display_errors', '0');
+
 header('Content-Type: application/json');
 
-$data = json_decode(file_get_contents('php://input'), true);
-$action = $data['action'] ?? '';
+try {
+  $data = json_decode(file_get_contents('php://input'), true);
+  $action = $data['action'] ?? '';
+} catch(Exception $e){
+  echo json_encode([
+    'error' => 'Invalid request: ' . $e->getMessage()
+  ]);
+  exit;
+}
 
 // Simple encryption key (in production, use environment variable or secure storage)
 define('ENCRYPTION_KEY', 'lovelace_cms_key_2024'); // TODO: Move to .env
 
 function encryptKey($key){
-  $iv = openssl_random_pseudo_bytes(16);
-  $encrypted = openssl_encrypt($key, 'AES-256-CBC', ENCRYPTION_KEY, 0, $iv);
-  return base64_encode($iv . '::' . $encrypted);
+  try {
+    if(!function_exists('openssl_random_pseudo_bytes')){
+      throw new Exception('OpenSSL not available');
+    }
+    $iv = openssl_random_pseudo_bytes(16);
+    $encrypted = openssl_encrypt($key, 'AES-256-CBC', ENCRYPTION_KEY, 0, $iv);
+    if($encrypted === false){
+      throw new Exception('Encryption failed');
+    }
+    return base64_encode($iv . '::' . $encrypted);
+  } catch(Exception $e){
+    // Fallback: base64 encode (not secure, but better than failing)
+    error_log('Encryption failed: ' . $e->getMessage());
+    return base64_encode('FALLBACK::' . $key);
+  }
 }
 
 function decryptKey($encryptedKey){
-  $parts = explode('::', base64_decode($encryptedKey));
-  if(count($parts) !== 2) return null;
-  return openssl_decrypt($parts[1], 'AES-256-CBC', ENCRYPTION_KEY, 0, $parts[0]);
+  try {
+    $decoded = base64_decode($encryptedKey);
+    $parts = explode('::', $decoded);
+
+    // Check for fallback encoding
+    if(count($parts) === 2 && $parts[0] === 'FALLBACK'){
+      return $parts[1];
+    }
+
+    if(count($parts) !== 2) return null;
+
+    if(!function_exists('openssl_decrypt')){
+      throw new Exception('OpenSSL not available');
+    }
+
+    $decrypted = openssl_decrypt($parts[1], 'AES-256-CBC', ENCRYPTION_KEY, 0, $parts[0]);
+    if($decrypted === false){
+      throw new Exception('Decryption failed');
+    }
+    return $decrypted;
+  } catch(Exception $e){
+    error_log('Decryption failed: ' . $e->getMessage());
+    return null;
+  }
 }
+
+try {
 
 if($action === 'check_key'){
   // Check if a valid API key is configured
@@ -187,3 +233,12 @@ if($action === 'validate_key'){
 }
 
 echo json_encode(['error' => 'Invalid action']);
+
+} catch(Exception $e){
+  // Catch any unexpected errors and return JSON
+  error_log('API Setup Error: ' . $e->getMessage());
+  echo json_encode([
+    'error' => 'Server error: ' . $e->getMessage(),
+    'action' => $action ?? 'unknown'
+  ]);
+}
