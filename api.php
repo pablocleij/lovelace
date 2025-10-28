@@ -305,6 +305,21 @@ function callLLM($provider, $apiKey, $model, $systemPrompt, $userMessage){
 
 $data = json_decode(file_get_contents('php://input'), true);
 
+// Handle confirmed requests (bypass confirmation check)
+$isConfirmed = $data['confirmed'] ?? false;
+$pendingEvent = $data['pending_event'] ?? null;
+
+if($isConfirmed && $pendingEvent){
+  // User approved the action, write the pending event
+  writeEvent($pendingEvent);
+
+  echo json_encode([
+    'message' => 'Action approved and completed successfully.',
+    'event' => $pendingEvent
+  ]);
+  exit;
+}
+
 // Build proactive memory context from event history
 $contextPrompt = buildContext();
 
@@ -361,14 +376,29 @@ if(!isset($response['event']['patches'])){
   $response['event']['patches'] = [];
 }
 
-// AI checks policy before applying patch
-foreach($response['event']['patches'] ?? [] as $patch){
-  if(in_array($patch['op'], $policy['require_confirmation_for'])){
-    // Requires user confirmation
-    $response['requires_confirmation'] = true;
-  }
+// AI checks policy before applying patch (unless already confirmed)
+if(!$isConfirmed){
+  foreach($response['event']['patches'] ?? [] as $patch){
+    if(in_array($patch['op'], $policy['require_confirmation_for'])){
+      // Requires user confirmation
+      $response['requires_confirmation'] = true;
+      $response['pending_event'] = $response['event'];
+      $response['confirmation_message'] = "You're about to perform a {$patch['op']} operation on {$patch['target']}. This action requires confirmation.";
 
-  // Validation layer: validate AI-generated data before writing
+      // Don't write event yet, wait for user confirmation
+      echo json_encode([
+        'message'=>$response['message'],
+        'requires_confirmation'=>true,
+        'pending_event'=>$response['event'],
+        'confirmation_message'=>$response['confirmation_message']
+      ]);
+      exit;
+    }
+  }
+}
+
+// Validation layer: validate AI-generated data before writing
+foreach($response['event']['patches'] ?? [] as $patch){
   if(($patch['op']=='create_file' || $patch['op']=='create_collection_item') && isset($patch['schema'])){
     try {
       validateSchema($patch['schema'], $patch['value']);

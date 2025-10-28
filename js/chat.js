@@ -83,6 +83,57 @@ input.addEventListener('keydown', async (e) => {
     container.appendChild(botDiv);
     container.scrollTop = container.scrollHeight;
 
+    // Handle confirmation requests
+    if(res.requires_confirmation){
+      const confirmDiv = document.createElement('div');
+      confirmDiv.className = 'bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg mb-4';
+
+      confirmDiv.innerHTML = `
+        <div class="font-bold text-yellow-900 mb-2">⚠️ Confirmation Required</div>
+        <div class="text-gray-800 mb-4">${res.confirmation_message || 'This action requires confirmation. Do you want to proceed?'}</div>
+      `;
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'flex gap-2';
+
+      const approveBtn = document.createElement('button');
+      approveBtn.textContent = 'Approve';
+      approveBtn.className = 'px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition';
+      approveBtn.addEventListener('click', async () => {
+        confirmDiv.remove();
+        // Re-submit with confirmed flag
+        const confirmRes = await fetch('api.php', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({action:'chat', message: msg, confirmed: true, pending_event: res.pending_event})
+        }).then(r=>r.json());
+
+        const confirmBotDiv = document.createElement('div');
+        confirmBotDiv.className = 'chat-message bg-white border-l-4 border-green-500 p-4 rounded-r-lg mb-4 shadow-sm';
+        confirmBotDiv.innerHTML = `<div class="font-semibold text-green-900 mb-1">lovelace AI</div><div class="text-gray-800">${confirmRes.message}</div>`;
+        container.appendChild(confirmBotDiv);
+        container.scrollTop = container.scrollHeight;
+      });
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition';
+      cancelBtn.addEventListener('click', () => {
+        confirmDiv.remove();
+        const cancelDiv = document.createElement('div');
+        cancelDiv.className = 'chat-message bg-gray-100 border-l-4 border-gray-400 p-4 rounded-r-lg mb-4';
+        cancelDiv.innerHTML = `<div class="text-gray-700">Action cancelled.</div>`;
+        container.appendChild(cancelDiv);
+        container.scrollTop = container.scrollHeight;
+      });
+
+      buttonContainer.appendChild(approveBtn);
+      buttonContainer.appendChild(cancelBtn);
+      confirmDiv.appendChild(buttonContainer);
+      container.appendChild(confirmDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
     if(res.form){
       const f = document.createElement('form');
       f.className = 'dynamic-form';
