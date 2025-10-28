@@ -25,4 +25,7 @@ curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
 curl_setopt($ch,CURLOPT_POSTFIELDS,json_encode($payload));
 $res=json_decode(curl_exec($ch),true); curl_close($ch);
 
-echo json_encode(['message'=>$res['choices'][0]['message']['content']]);
+$aiMessage = $res['choices'][0]['message']['content'];
+$response = json_decode($aiMessage,true);
+writeEvent($response['event']);
+echo json_encode(['message'=>$response['message'],'form'=>$response['form']??null]);
