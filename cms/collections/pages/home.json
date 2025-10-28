@@ -1,0 +1,7 @@
+{
+  "title":"Home",
+  "sections":[
+    {"type":"hero","title":"Welcome","subtitle":"Launch fast"},
+    {"type":"features","items":[{"title":"Fast","desc":"Instant setup"},{"title":"AI-driven","desc":"Proactive CMS"}]}
+  ]
+}
