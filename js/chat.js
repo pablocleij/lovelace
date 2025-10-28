@@ -1,4 +1,5 @@
 const container = document.getElementById('chat-container');
+const chatSidebar = document.getElementById('chat-sidebar');
 
 // Create input wrapper with Tailwind styling
 const inputWrapper = document.createElement('div');
@@ -6,9 +7,9 @@ inputWrapper.className = 'chat-input-wrapper';
 
 const input = document.createElement('input');
 input.className = 'chat-input';
-input.placeholder = "Type your message... (e.g., 'Create a homepage' or 'Add a blog section')";
+input.placeholder = "Type your message...";
 inputWrapper.appendChild(input);
-document.body.appendChild(inputWrapper);
+chatSidebar.appendChild(inputWrapper);
 
 // Show AI greeting on first boot
 async function showGreeting(){
@@ -64,6 +65,20 @@ if(exportBtn){
   exportBtn.addEventListener('click', () => {
     window.location.href = 'export.php';
   });
+}
+
+// Preview refresh function
+function refreshPreview(){
+  const iframe = document.getElementById('preview-iframe');
+  if(iframe){
+    iframe.src = 'preview.php?ts=' + Date.now();
+  }
+}
+
+// Refresh preview button handler
+const refreshBtn = document.getElementById('refresh-preview-btn');
+if(refreshBtn){
+  refreshBtn.addEventListener('click', refreshPreview);
 }
 
 input.addEventListener('keydown', async (e) => {
