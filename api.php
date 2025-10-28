@@ -28,4 +28,11 @@ $res=json_decode(curl_exec($ch),true); curl_close($ch);
 $aiMessage = $res['choices'][0]['message']['content'];
 $response = json_decode($aiMessage,true);
 writeEvent($response['event']);
+
+if(in_array('add_to_navigation',$response['suggestions'])){
+  $nav=json_decode(file_get_contents('cms/config/navigation.json'),true);
+  $nav[]=$response['page'];
+  file_put_contents('cms/config/navigation.json',json_encode($nav,JSON_PRETTY_PRINT));
+}
+
 echo json_encode(['message'=>$response['message'],'form'=>$response['form']??null]);
