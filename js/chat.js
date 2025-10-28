@@ -148,5 +148,93 @@ input.addEventListener('keydown', async (e) => {
 
       container.appendChild(suggestDiv);
     }
+
+    // Render section recommendations
+    if(res.section_suggestions && res.section_suggestions.length > 0){
+      const sectionDiv = document.createElement('div');
+      sectionDiv.style.border = '2px solid #1a73e8';
+      sectionDiv.style.padding = '12px';
+      sectionDiv.style.margin = '12px 0';
+      sectionDiv.style.borderRadius = '6px';
+      sectionDiv.style.backgroundColor = '#f0f7ff';
+
+      const sectionTitle = document.createElement('div');
+      sectionTitle.innerHTML = '<strong>💡 Recommended Sections</strong>';
+      sectionTitle.style.marginBottom = '8px';
+      sectionTitle.style.color = '#1a73e8';
+      sectionDiv.appendChild(sectionTitle);
+
+      res.section_suggestions.forEach((suggestion, index) => {
+        const suggestionCard = document.createElement('div');
+        suggestionCard.style.backgroundColor = 'white';
+        suggestionCard.style.border = '1px solid #ddd';
+        suggestionCard.style.borderRadius = '4px';
+        suggestionCard.style.padding = '10px';
+        suggestionCard.style.marginBottom = '8px';
+
+        const sectionType = document.createElement('div');
+        sectionType.style.fontWeight = 'bold';
+        sectionType.style.marginBottom = '4px';
+        sectionType.textContent = `${index + 1}. ${suggestion.section_type}`;
+        suggestionCard.appendChild(sectionType);
+
+        const position = document.createElement('div');
+        position.style.fontSize = '0.85em';
+        position.style.color = '#666';
+        position.textContent = `Position: ${suggestion.position}`;
+        suggestionCard.appendChild(position);
+
+        if(suggestion.reason){
+          const reason = document.createElement('div');
+          reason.style.fontSize = '0.9em';
+          reason.style.marginTop = '4px';
+          reason.style.fontStyle = 'italic';
+          reason.textContent = `Why: ${suggestion.reason}`;
+          suggestionCard.appendChild(reason);
+        }
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.marginTop = '8px';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.gap = '8px';
+
+        const acceptBtn = document.createElement('button');
+        acceptBtn.textContent = 'Add Section';
+        acceptBtn.style.padding = '6px 12px';
+        acceptBtn.style.backgroundColor = '#1a73e8';
+        acceptBtn.style.color = 'white';
+        acceptBtn.style.border = 'none';
+        acceptBtn.style.borderRadius = '4px';
+        acceptBtn.style.cursor = 'pointer';
+        acceptBtn.style.fontSize = '0.9em';
+
+        acceptBtn.addEventListener('click', () => {
+          input.value = `Add ${suggestion.section_type} section ${suggestion.position}`;
+          input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+        });
+
+        const dismissBtn = document.createElement('button');
+        dismissBtn.textContent = 'Dismiss';
+        dismissBtn.style.padding = '6px 12px';
+        dismissBtn.style.backgroundColor = '#f0f0f0';
+        dismissBtn.style.color = '#333';
+        dismissBtn.style.border = '1px solid #ccc';
+        dismissBtn.style.borderRadius = '4px';
+        dismissBtn.style.cursor = 'pointer';
+        dismissBtn.style.fontSize = '0.9em';
+
+        dismissBtn.addEventListener('click', () => {
+          suggestionCard.remove();
+        });
+
+        buttonContainer.appendChild(acceptBtn);
+        buttonContainer.appendChild(dismissBtn);
+        suggestionCard.appendChild(buttonContainer);
+
+        sectionDiv.appendChild(suggestionCard);
+      });
+
+      container.appendChild(sectionDiv);
+    }
   }
 });

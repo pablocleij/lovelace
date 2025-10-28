@@ -47,6 +47,28 @@ function buildContext(){
     $context .= "NAVIGATION: " . json_encode($nav) . "\n\n";
   }
 
+  // AI-driven section recommendations: analyze existing pages
+  $context .= "CONTENT ANALYSIS:\n";
+  $pagesDir = 'cms/collections/pages';
+  if(is_dir($pagesDir)){
+    $pageFiles = glob("{$pagesDir}/*.json");
+    foreach($pageFiles as $file){
+      $page = json_decode(file_get_contents($file), true);
+      $basename = basename($file, '.json');
+
+      if(isset($page['sections'])){
+        $sectionTypes = array_map(function($s){ return $s['type'] ?? 'unknown'; }, $page['sections']);
+        $context .= "- Page '{$basename}' has sections: " . implode(', ', $sectionTypes) . "\n";
+      }
+    }
+  }
+  $context .= "\n";
+
+  $context .= "RECOMMENDATION INSTRUCTIONS:\n";
+  $context .= "Analyze the current content and suggest new sections that would improve the site.\n";
+  $context .= "Consider what's missing: testimonials, FAQ, team, pricing, contact, gallery, etc.\n";
+  $context .= "Return suggestions in format: {\"section_suggestions\":[{\"section_type\":\"testimonials\",\"position\":\"after_hero\",\"reason\":\"Build trust with customer feedback\"}]}\n\n";
+
   return $context;
 }
 
@@ -247,10 +269,14 @@ if(!empty($scoredSuggestions)){
   $scoredSuggestions = array_slice($scoredSuggestions, 0, 5);
 }
 
+// AI-driven section recommendations
+$sectionSuggestions = $response['section_suggestions'] ?? [];
+
 echo json_encode([
   'message'=>$response['message'],
   'form'=>$response['form']??null,
   'suggestions'=>$response['suggestions']??[],
   'scored_suggestions'=>$scoredSuggestions,
+  'section_suggestions'=>$sectionSuggestions,
   'error'=>$response['error']??null
 ]);

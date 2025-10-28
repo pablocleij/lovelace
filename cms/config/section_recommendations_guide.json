@@ -1,0 +1,98 @@
+{
+  "description": "AI-driven section recommendations based on content analysis",
+  "how_it_works": {
+    "steps": [
+      "1. AI analyzes existing page sections and collections",
+      "2. AI identifies gaps in content (missing testimonials, pricing, FAQ, etc.)",
+      "3. AI generates contextual section recommendations",
+      "4. User receives visual cards with Accept/Dismiss buttons",
+      "5. User clicks 'Add Section' to confirm insertion",
+      "6. AI creates new section at recommended position"
+    ]
+  },
+  "recommendation_format": {
+    "section_type": "The type of section to add (testimonials, faq, pricing, etc.)",
+    "position": "Where to insert (after_hero, before_footer, end_of_page, etc.)",
+    "reason": "Why this section would improve the site"
+  },
+  "example_ai_response": {
+    "message": "I've analyzed your homepage and have some recommendations",
+    "section_suggestions": [
+      {
+        "section_type": "testimonials",
+        "position": "after_hero",
+        "reason": "Build trust with customer feedback"
+      },
+      {
+        "section_type": "faq",
+        "position": "before_footer",
+        "reason": "Answer common questions and reduce support load"
+      },
+      {
+        "section_type": "contact",
+        "position": "end_of_page",
+        "reason": "Make it easy for visitors to get in touch"
+      }
+    ]
+  },
+  "common_section_types": [
+    "testimonials - Customer reviews and feedback",
+    "faq - Frequently asked questions",
+    "pricing - Pricing tables and plans",
+    "team - Team member profiles",
+    "contact - Contact form or information",
+    "gallery - Image gallery or portfolio",
+    "cta - Call-to-action section",
+    "stats - Statistics or achievements",
+    "timeline - Company history or process steps",
+    "partners - Partner logos or affiliates",
+    "newsletter - Email signup form",
+    "social_proof - Trust badges, client logos"
+  ],
+  "position_values": [
+    "after_hero - Right after the hero section",
+    "before_features - Before the features section",
+    "before_footer - Near the bottom of the page",
+    "end_of_page - At the very end",
+    "after_features - After the features section",
+    "replace_X - Replace existing section X"
+  ],
+  "frontend_ui": {
+    "display": "Highlighted blue card with lightbulb emoji",
+    "includes": [
+      "Section type name (bold)",
+      "Position description",
+      "Reason/benefit (italic)",
+      "Two buttons: 'Add Section' (blue) and 'Dismiss' (gray)"
+    ],
+    "interactions": {
+      "add_section": "Converts to natural language command and sends to AI",
+      "dismiss": "Removes recommendation card from UI"
+    }
+  },
+  "ai_analysis_factors": [
+    "Current page structure and existing sections",
+    "Available collections (posts, products, testimonials)",
+    "Industry best practices",
+    "Missing common website elements",
+    "Content gaps and opportunities",
+    "User journey optimization"
+  ],
+  "user_flow_example": {
+    "user_message": "Analyze my homepage",
+    "ai_analyzes": "Homepage has hero + features, but no social proof",
+    "ai_recommends": "testimonials section after hero",
+    "user_sees": "Visual card with 'Add testimonials section after_hero' and reason",
+    "user_clicks": "Add Section button",
+    "ai_receives": "Add testimonials section after_hero",
+    "ai_creates": "New testimonials section with sample data or form request"
+  },
+  "benefits": [
+    "Proactive improvement suggestions",
+    "Helps non-designers build complete websites",
+    "Contextual and intelligent recommendations",
+    "User has full control (accept or dismiss)",
+    "Reduces back-and-forth conversation",
+    "Educational (explains why each section is recommended)"
+  ]
+}
