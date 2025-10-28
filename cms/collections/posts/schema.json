@@ -1,0 +1,4 @@
+{
+  "name":"posts",
+  "fields":{"title":"string","content":"string","author":"string","date":"date"}
+}

@@ -1,0 +1,17 @@
+{
+  "name":"page",
+  "fields":{
+    "title":"string",
+    "sections":"list",
+    "meta":"object"
+  },
+  "meta_schema":{
+    "title":"string",
+    "description":"string",
+    "og_image":"string",
+    "og_type":"string",
+    "keywords":"string",
+    "author":"string",
+    "canonical":"string"
+  }
+}

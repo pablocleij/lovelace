@@ -116,27 +116,49 @@ function buildContext(){
   $context .= "Consider what's missing: testimonials, FAQ, team, pricing, contact, gallery, etc.\n";
   $context .= "Return suggestions in format: {\"section_suggestions\":[{\"section_type\":\"testimonials\",\"position\":\"after_hero\",\"reason\":\"Build trust with customer feedback\"}]}\n\n";
 
+  $context .= "SCHEMA LOCATION (IMPORTANT):\n";
+  $context .= "Schemas are co-located with collections: /cms/collections/{collection}/schema.json\n";
+  $context .= "When creating a collection, always create schema.json in the collection directory.\n";
+  $context .= "Example: create_collection 'testimonials' should create both:\n";
+  $context .= "  - /cms/collections/testimonials/ (directory)\n";
+  $context .= "  - /cms/collections/testimonials/schema.json (schema file)\n\n";
+
   return $context;
 }
 
 // Validation layer: validate data against schema
-function validateSchema($schemaName, $data){
+// Now supports co-located schemas (PRD spec)
+function validateSchema($schemaName, $data, $collectionName = null){
+  // Try collection-specific schema first
+  if($collectionName){
+    $colocatedPath = "cms/collections/{$collectionName}/schema.json";
+    if(file_exists($colocatedPath)){
+      $schema = json_decode(file_get_contents($colocatedPath), true);
+      return validateSchemaFields($schema, $data);
+    }
+  }
+
+  // Fall back to separate schemas directory
   $schemaPath = "cms/schemas/{$schemaName}.json";
   if(!file_exists($schemaPath)) return true; // No schema = no validation
 
   $schema = json_decode(file_get_contents($schemaPath), true);
+  return validateSchemaFields($schema, $data);
+}
 
+// Extract validation logic for reuse
+function validateSchemaFields($schema, $data){
   // Handle schema inheritance
   if(isset($schema['extends'])){
     $parentPath = "cms/schemas/{$schema['extends']}.json";
     if(file_exists($parentPath)){
       $parent = json_decode(file_get_contents($parentPath), true);
-      $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields']);
+      $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields'] ?? []);
     }
   }
 
   // Validate all required fields are present
-  foreach($schema['fields'] as $f=>$type){
+  foreach(($schema['fields'] ?? []) as $f=>$type){
     if(!isset($data[$f])){
       throw new Exception("Missing required field: $f");
     }
@@ -161,18 +183,33 @@ function validateSchema($schemaName, $data){
 }
 
 // Auto-generate forms for missing required schema fields
-function validateAndGenerateForm($schemaName, $data){
+// Now supports co-located schemas
+function validateAndGenerateForm($schemaName, $data, $collectionName = null){
+  // Try collection-specific schema first
+  if($collectionName){
+    $colocatedPath = "cms/collections/{$collectionName}/schema.json";
+    if(file_exists($colocatedPath)){
+      $schema = json_decode(file_get_contents($colocatedPath), true);
+      return generateFormFromSchema($schema, $data);
+    }
+  }
+
+  // Fall back to separate schemas directory
   $schemaPath = "cms/schemas/{$schemaName}.json";
   if(!file_exists($schemaPath)) return null;
 
   $schema = json_decode(file_get_contents($schemaPath), true);
+  return generateFormFromSchema($schema, $data);
+}
 
+// Extract form generation logic
+function generateFormFromSchema($schema, $data){
   // Handle schema inheritance
   if(isset($schema['extends'])){
     $parentPath = "cms/schemas/{$schema['extends']}.json";
     if(file_exists($parentPath)){
       $parent = json_decode(file_get_contents($parentPath), true);
-      $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields']);
+      $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields'] ?? []);
     }
   }
 
@@ -192,7 +229,7 @@ function validateAndGenerateForm($schemaName, $data){
   ];
 
   // Check for missing fields
-  foreach($schema['fields'] as $f=>$type){
+  foreach(($schema['fields'] ?? []) as $f=>$type){
     if(!isset($data[$f])){
       $field = [
         "name" => $f,

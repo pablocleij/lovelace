@@ -6,7 +6,25 @@ $rollbackTo = $_GET['rollback'] ?? null;
 $verifyMode = $_GET['verify'] ?? false;
 
 // Schema inheritance - merge parent schema fields
-function mergeSchema($schemaName){
+// Now supports co-located schemas (PRD spec: /cms/collections/posts/schema.json)
+function mergeSchema($schemaName, $collectionName = null){
+  // Try collection-specific schema first (PRD spec)
+  if($collectionName){
+    $colocatedPath = "cms/collections/{$collectionName}/schema.json";
+    if(file_exists($colocatedPath)){
+      $schema = json_decode(file_get_contents($colocatedPath), true);
+
+      // If schema extends another, merge parent fields
+      if(isset($schema['extends'])){
+        $parent = mergeSchema($schema['extends']);
+        $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields'] ?? []);
+      }
+
+      return $schema;
+    }
+  }
+
+  // Fall back to separate schemas directory (backward compatibility)
   $schemaPath = "cms/schemas/{$schemaName}.json";
   if(!file_exists($schemaPath)) return ['fields'=>[]];
 
@@ -15,7 +33,7 @@ function mergeSchema($schemaName){
   // If schema extends another, merge parent fields
   if(isset($schema['extends'])){
     $parent = mergeSchema($schema['extends']);
-    $schema['fields'] = array_merge($parent['fields'], $schema['fields']);
+    $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields'] ?? []);
   }
 
   return $schema;
