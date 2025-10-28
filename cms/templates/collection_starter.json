@@ -1,0 +1,187 @@
+{
+  "description": "Template for AI-generated collection creation with example items",
+  "templates": {
+    "testimonials": {
+      "schema": {
+        "name": "testimonial",
+        "fields": {
+          "name": "string",
+          "company": "string",
+          "role": "string",
+          "quote": "string",
+          "rating": "number",
+          "photo": "string"
+        }
+      },
+      "example_item": {
+        "name": "Jane Doe",
+        "company": "Tech Corp",
+        "role": "CEO",
+        "quote": "This product transformed our business.",
+        "rating": 5,
+        "photo": "/assets/testimonials/jane.jpg"
+      }
+    },
+    "team": {
+      "schema": {
+        "name": "team_member",
+        "fields": {
+          "name": "string",
+          "role": "string",
+          "bio": "string",
+          "photo": "string",
+          "email": "string",
+          "social": "object"
+        }
+      },
+      "example_item": {
+        "name": "John Smith",
+        "role": "Software Engineer",
+        "bio": "Full-stack developer with 10 years experience.",
+        "photo": "/assets/team/john.jpg",
+        "email": "john@example.com",
+        "social": {
+          "twitter": "@johnsmith",
+          "linkedin": "johnsmith"
+        }
+      }
+    },
+    "products": {
+      "schema": {
+        "name": "product",
+        "fields": {
+          "name": "string",
+          "description": "string",
+          "price": "number",
+          "image": "string",
+          "category": "string",
+          "inStock": "boolean",
+          "features": "list"
+        }
+      },
+      "example_item": {
+        "name": "Premium Package",
+        "description": "Our most popular product",
+        "price": 99.99,
+        "image": "/assets/products/premium.jpg",
+        "category": "Software",
+        "inStock": true,
+        "features": ["Feature 1", "Feature 2", "Feature 3"]
+      }
+    },
+    "faq": {
+      "schema": {
+        "name": "faq_item",
+        "fields": {
+          "question": "string",
+          "answer": "string",
+          "category": "string",
+          "order": "number"
+        }
+      },
+      "example_item": {
+        "question": "How do I get started?",
+        "answer": "Simply sign up and follow our onboarding guide.",
+        "category": "Getting Started",
+        "order": 1
+      }
+    },
+    "events": {
+      "schema": {
+        "name": "event",
+        "fields": {
+          "title": "string",
+          "description": "string",
+          "date": "string",
+          "location": "string",
+          "image": "string",
+          "registration_link": "string"
+        }
+      },
+      "example_item": {
+        "title": "Annual Conference 2024",
+        "description": "Join us for our biggest event of the year",
+        "date": "2024-06-15",
+        "location": "San Francisco, CA",
+        "image": "/assets/events/conference.jpg",
+        "registration_link": "https://example.com/register"
+      }
+    },
+    "portfolio": {
+      "schema": {
+        "name": "portfolio_item",
+        "fields": {
+          "title": "string",
+          "description": "string",
+          "client": "string",
+          "image": "string",
+          "tags": "list",
+          "link": "string",
+          "date": "string"
+        }
+      },
+      "example_item": {
+        "title": "E-commerce Redesign",
+        "description": "Complete UX overhaul for major retailer",
+        "client": "Retail Co",
+        "image": "/assets/portfolio/project1.jpg",
+        "tags": ["UI/UX", "E-commerce", "React"],
+        "link": "https://example.com/project",
+        "date": "2024-03-01"
+      }
+    },
+    "services": {
+      "schema": {
+        "name": "service",
+        "fields": {
+          "name": "string",
+          "description": "string",
+          "icon": "string",
+          "features": "list",
+          "price": "string"
+        }
+      },
+      "example_item": {
+        "name": "Consulting",
+        "description": "Expert advice for your business needs",
+        "icon": "lightbulb",
+        "features": ["Strategy Planning", "Technical Assessment", "Implementation Support"],
+        "price": "Contact for pricing"
+      }
+    }
+  },
+  "field_type_inference": {
+    "name": "string",
+    "title": "string",
+    "description": "string",
+    "quote": "string",
+    "bio": "string",
+    "content": "string",
+    "email": "string",
+    "phone": "string",
+    "address": "string",
+    "url": "string",
+    "link": "string",
+    "image": "string",
+    "photo": "string",
+    "icon": "string",
+    "price": "number",
+    "rating": "number",
+    "order": "number",
+    "count": "number",
+    "date": "string",
+    "timestamp": "string",
+    "inStock": "boolean",
+    "active": "boolean",
+    "enabled": "boolean",
+    "featured": "boolean",
+    "published": "boolean",
+    "tags": "list",
+    "features": "list",
+    "items": "list",
+    "categories": "list",
+    "social": "object",
+    "meta": "object",
+    "settings": "object"
+  }
+}

@@ -34,7 +34,8 @@ function buildContext(){
   $context .= "2. CLARIFICATION - When user request is ambiguous, return a form with fields to gather needed info\n";
   $context .= "3. SUGGESTIONS - After completing actions, suggest logical next steps in scored_suggestions array\n";
   $context .= "4. REFLECTION - Analyze site structure and proactively suggest improvements\n";
-  $context .= "5. EDUCATION - Explain WHY you're suggesting something in the reason field\n\n";
+  $context .= "5. EDUCATION - Explain WHY you're suggesting something in the reason field\n";
+  $context .= "6. DYNAMIC COLLECTIONS - When user mentions content types not yet existing, create them automatically\n\n";
 
   $context .= "CONFIRMATION TRIGGERS:\n";
   $context .= "- Deleting pages, collections, or content\n";
@@ -48,6 +49,13 @@ function buildContext(){
   $context .= "- User says 'add image' but doesn't provide file\n";
   $context .= "- User says 'change colors' but doesn't specify which colors\n";
   $context .= "Response: Return form with fields array, provide smart defaults\n\n";
+
+  $context .= "DYNAMIC COLLECTION CREATION TRIGGERS:\n";
+  $context .= "- User mentions 'testimonials' but collection doesn't exist → create testimonials collection\n";
+  $context .= "- User says 'add team members' → create team collection with name, role, bio, photo fields\n";
+  $context .= "- User says 'create products section' → create products collection with appropriate schema\n";
+  $context .= "- User mentions 'FAQ', 'portfolio', 'events', 'services' → create corresponding collections\n";
+  $context .= "Response: Use create_collection with inferred schema, add 1 example item, return form for real data\n\n";
 
   $context .= "SUGGESTION EXAMPLES:\n";
   $context .= "- After creating homepage: Suggest 'Add an about page' or 'Create a blog section'\n";
@@ -142,7 +150,104 @@ function buildContext(){
   $context .= "Update file: {\"op\":\"update_file\",\"target\":\"collections/pages/home.json\",\"value\":{\"title\":\"New Title\"},\"merge\":true}\n";
   $context .= "Delete file: {\"op\":\"delete_file\",\"target\":\"collections/posts/old.json\"}\n\n";
 
+  // Load collection starter templates
+  $starterTemplates = file_exists('cms/templates/collection_starter.json')
+    ? json_decode(file_get_contents('cms/templates/collection_starter.json'), true)
+    : null;
+
+  if($starterTemplates){
+    $context .= "DYNAMIC COLLECTION CREATION:\n";
+    $context .= "You can create new collections conversationally based on user requests.\n";
+    $context .= "Use field type inference to determine appropriate types from field names:\n";
+
+    foreach(($starterTemplates['field_type_inference'] ?? []) as $field => $type){
+      $context .= "  - {$field}: {$type}\n";
+    }
+
+    $context .= "\nCommon collection templates available:\n";
+    foreach(($starterTemplates['templates'] ?? []) as $name => $template){
+      $fields = array_keys($template['schema']['fields'] ?? []);
+      $context .= "  - {$name}: " . implode(', ', $fields) . "\n";
+    }
+
+    $context .= "\nWhen user requests a new collection:\n";
+    $context .= "1. Infer appropriate schema from description or use template\n";
+    $context .= "2. Create collection with create_collection operation\n";
+    $context .= "3. Optionally create 1-2 example items with create_collection_item\n";
+    $context .= "4. Confirm creation with user\n\n";
+
+    $context .= "Example conversation:\n";
+    $context .= "User: 'Add a testimonials section'\n";
+    $context .= "AI: Creates testimonials collection with fields: name, company, quote, rating\n";
+    $context .= "     Adds example testimonial item\n";
+    $context .= "     Returns confirmation with form to add real testimonials\n\n";
+  }
+
   return $context;
+}
+
+// Schema inference helper - infer field types from field names
+function inferSchemaFromFields($fields){
+  // Load field type inference rules
+  $templates = file_exists('cms/templates/collection_starter.json')
+    ? json_decode(file_get_contents('cms/templates/collection_starter.json'), true)
+    : null;
+
+  $inferenceRules = $templates['field_type_inference'] ?? [
+    'name' => 'string',
+    'title' => 'string',
+    'description' => 'string',
+    'content' => 'string',
+    'price' => 'number',
+    'rating' => 'number',
+    'date' => 'string',
+    'image' => 'string',
+    'photo' => 'string',
+    'active' => 'boolean',
+    'featured' => 'boolean',
+    'tags' => 'list',
+    'features' => 'list'
+  ];
+
+  $schema = ['fields' => []];
+
+  foreach($fields as $field){
+    $fieldName = strtolower(trim($field));
+
+    // Check exact match first
+    if(isset($inferenceRules[$fieldName])){
+      $schema['fields'][$fieldName] = $inferenceRules[$fieldName];
+    }
+    // Check for partial matches (e.g., "user_name" contains "name")
+    else {
+      $matched = false;
+      foreach($inferenceRules as $pattern => $type){
+        if(strpos($fieldName, $pattern) !== false){
+          $schema['fields'][$fieldName] = $type;
+          $matched = true;
+          break;
+        }
+      }
+      // Default to string if no match
+      if(!$matched){
+        $schema['fields'][$fieldName] = 'string';
+      }
+    }
+  }
+
+  return $schema;
+}
+
+// Get template schema for common collection types
+function getCollectionTemplate($collectionType){
+  $templates = file_exists('cms/templates/collection_starter.json')
+    ? json_decode(file_get_contents('cms/templates/collection_starter.json'), true)
+    : null;
+
+  if(!$templates) return null;
+
+  $type = strtolower(trim($collectionType));
+  return $templates['templates'][$type] ?? null;
 }
 
 // Validation layer: validate data against schema
