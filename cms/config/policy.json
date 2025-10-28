@@ -1,0 +1,5 @@
+{
+  "require_confirmation_for":["delete","overwrite_schema"],
+  "auto_apply":["content_update","style_change"],
+  "suggest_improvements":true
+}

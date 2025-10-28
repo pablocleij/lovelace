@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 $apiConfig = json_decode(file_get_contents('cms/config/api_key.json'), true);
 $apiKey = $apiConfig['key'];
+$policy = json_decode(file_get_contents('cms/config/policy.json'), true);
 
 function writeEvent($event){
   $prevHash = ''; // load previous hash if exists
@@ -27,6 +28,15 @@ $res=json_decode(curl_exec($ch),true); curl_close($ch);
 
 $aiMessage = $res['choices'][0]['message']['content'];
 $response = json_decode($aiMessage,true);
+
+// AI checks policy before applying patch
+foreach($response['event']['patches'] ?? [] as $patch){
+  if(in_array($patch['op'], $policy['require_confirmation_for'])){
+    // Requires user confirmation
+    $response['requires_confirmation'] = true;
+  }
+}
+
 writeEvent($response['event']);
 
 if(in_array('add_to_navigation',$response['suggestions'])){
