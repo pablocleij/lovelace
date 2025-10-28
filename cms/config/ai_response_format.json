@@ -1,41 +1,66 @@
 {
-  "description": "Example AI response format with scored suggestions",
-  "example": {
-    "message": "I've analyzed your site and have several improvement suggestions.",
+  "description": "REQUIRED AI response format - all responses MUST follow this exact structure",
+  "schema": {
+    "message": "string - Human-readable response to display to user",
     "event": {
-      "id": "0000010",
-      "timestamp": "2025-10-28T18:00:00Z",
+      "id": "string - Auto-generated event ID (format: 0000XXX)",
+      "timestamp": "string - ISO 8601 timestamp",
+      "actor": "string - Always 'ai-agent'",
+      "instruction": "string - User's original request",
+      "patches": "array - List of patch operations to apply"
+    },
+    "form": "object|null - Dynamic form if clarification needed",
+    "scored_suggestions": "array - Ranked suggestions with scores",
+    "section_suggestions": "array - Section recommendations",
+    "requires_confirmation": "boolean - If true, user must confirm before applying patches"
+  },
+  "mandatory_structure": {
+    "message": "REQUIRED - Must always be present",
+    "event": "REQUIRED - Must always include valid event structure",
+    "form": "OPTIONAL - Only if clarification needed",
+    "scored_suggestions": "OPTIONAL - For proactive suggestions",
+    "section_suggestions": "OPTIONAL - For content recommendations",
+    "requires_confirmation": "OPTIONAL - Default false"
+  },
+  "example_minimal": {
+    "message": "Homepage created successfully!",
+    "event": {
+      "id": "auto-generated",
+      "timestamp": "auto-generated",
       "actor": "ai-agent",
-      "instruction": "Analyze site for improvements",
+      "instruction": "Create a homepage",
+      "patches": [
+        {
+          "op": "create_file",
+          "target": "collections/pages/home.json",
+          "value": {"title": "Home", "sections": []}
+        }
+      ]
+    }
+  },
+  "example_with_form": {
+    "message": "I need some information to create your blog.",
+    "event": {
+      "id": "auto-generated",
+      "timestamp": "auto-generated",
+      "actor": "ai-agent",
+      "instruction": "Create a blog",
       "patches": []
     },
-    "scored_suggestions": [
-      {
-        "message": "Add meta descriptions to all pages for better SEO",
-        "score": 0.95
-      },
-      {
-        "message": "Create a contact form on the About page",
-        "score": 0.88
-      },
-      {
-        "message": "Group navigation items under 'Services' category",
-        "score": 0.82
-      },
-      {
-        "message": "Add social media links to the footer",
-        "score": 0.75
-      },
-      {
-        "message": "Compress images for faster page load",
-        "score": 0.70
-      }
-    ]
+    "form": {
+      "fields": [
+        {"name": "blog_title", "label": "Blog Title", "type": "text", "default": "My Blog"},
+        {"name": "posts_per_page", "label": "Posts per page", "type": "number", "default": 10}
+      ]
+    }
   },
-  "notes": [
-    "scored_suggestions is an array of objects with 'message' and 'score' fields",
-    "score is a float between 0 and 1 (0.95 = 95% confidence/priority)",
-    "Backend automatically sorts by score and limits to top 5",
-    "Frontend displays suggestions as clickable items with score percentages"
+  "validation_rules": [
+    "Response MUST be valid JSON",
+    "Response MUST include 'message' field",
+    "Response MUST include 'event' object with id, timestamp, actor, instruction, patches",
+    "If patches array is not empty, each patch must have 'op', 'target', 'value' fields",
+    "If form is present, it must have 'fields' array",
+    "scored_suggestions must be array of {message, score}",
+    "section_suggestions must be array of {section_type, position, reason}"
   ]
 }

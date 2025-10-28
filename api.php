@@ -10,6 +10,24 @@ $policy = json_decode(file_get_contents('cms/config/policy.json'), true);
 function buildContext(){
   $context = "You are lovelace, a conversational AI CMS.\n\n";
 
+  // CRITICAL: Enforce structured JSON response format
+  $context .= "RESPONSE FORMAT (MANDATORY):\n";
+  $context .= "You MUST respond with valid JSON in this exact structure:\n";
+  $context .= "{\n";
+  $context .= "  \"message\": \"Human-readable response\",\n";
+  $context .= "  \"event\": {\n";
+  $context .= "    \"id\": \"auto-generated\",\n";
+  $context .= "    \"timestamp\": \"ISO-8601\",\n";
+  $context .= "    \"actor\": \"ai-agent\",\n";
+  $context .= "    \"instruction\": \"user's original request\",\n";
+  $context .= "    \"patches\": [{\"op\": \"operation\", \"target\": \"path\", \"value\": {}}]\n";
+  $context .= "  },\n";
+  $context .= "  \"form\": null or {\"fields\": []},\n";
+  $context .= "  \"scored_suggestions\": [],\n";
+  $context .= "  \"section_suggestions\": []\n";
+  $context .= "}\n\n";
+  $context .= "NEVER return plain text. ALWAYS return valid JSON matching this structure.\n\n";
+
   // Include policy
   if(file_exists('cms/config/policy.json')){
     $policy = json_decode(file_get_contents('cms/config/policy.json'), true);
@@ -243,7 +261,56 @@ $contextPrompt = buildContext();
 
 // Call the configured LLM provider
 $aiMessage = callLLM($provider, $apiKey, $model, $contextPrompt, $data['message']);
-$response = json_decode($aiMessage,true);
+$response = json_decode($aiMessage, true);
+
+// Validate response structure
+if(!$response || !is_array($response)){
+  echo json_encode([
+    'message' => 'Error: AI returned invalid response format',
+    'error' => 'Response must be valid JSON',
+    'raw_response' => substr($aiMessage, 0, 500)
+  ]);
+  exit;
+}
+
+// Ensure required fields exist
+if(!isset($response['message'])){
+  $response['message'] = 'Action completed';
+}
+
+if(!isset($response['event'])){
+  // Create minimal event structure if missing
+  $response['event'] = [
+    'id' => 'auto',
+    'timestamp' => date('c'),
+    'actor' => 'ai-agent',
+    'instruction' => $data['message'],
+    'patches' => []
+  ];
+}
+
+// Auto-generate event ID and timestamp if not provided
+if(!isset($response['event']['id']) || $response['event']['id'] === 'auto-generated' || $response['event']['id'] === 'auto'){
+  $eventCount = count(glob('cms/events/*.json'));
+  $response['event']['id'] = str_pad($eventCount + 1, 7, '0', STR_PAD_LEFT);
+}
+
+if(!isset($response['event']['timestamp']) || $response['event']['timestamp'] === 'ISO-8601' || $response['event']['timestamp'] === 'auto-generated'){
+  $response['event']['timestamp'] = date('c');
+}
+
+// Ensure required event fields
+if(!isset($response['event']['actor'])){
+  $response['event']['actor'] = 'ai-agent';
+}
+
+if(!isset($response['event']['instruction'])){
+  $response['event']['instruction'] = $data['message'];
+}
+
+if(!isset($response['event']['patches'])){
+  $response['event']['patches'] = [];
+}
 
 // AI checks policy before applying patch
 foreach($response['event']['patches'] ?? [] as $patch){
