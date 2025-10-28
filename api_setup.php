@@ -82,8 +82,8 @@ if($action === 'save_key'){
 }
 
 if($action === 'validate_key'){
-  // Skip validation if CURL not available
-  if(!extension_loaded('curl')){
+  // Skip validation if CURL not available - check for function instead of extension
+  if(!function_exists('curl_init')){
     echo json_encode([
       'valid' => true,
       'warning' => 'CURL not available, skipping validation',
