@@ -21,6 +21,19 @@ $theme = json_decode(file_get_contents('cms/config/theme.json'), true);
 <body>
 <?php
 
+// Fetch items from a collection
+function fetchCollection($collectionName, $limit = null){
+  $files = glob("cms/collections/{$collectionName}/*.json");
+  $items = [];
+  foreach($files as $file){
+    $items[] = json_decode(file_get_contents($file), true);
+  }
+  if($limit){
+    $items = array_slice($items, 0, $limit);
+  }
+  return $items;
+}
+
 // Simple template renderer
 function renderTemplate($type, $data){
   $templatePath = "cms/layouts/{$type}.json";
@@ -63,6 +76,10 @@ foreach($snap as $item){
     echo "<div class='page'>";
     echo "<h1>{$item['title']}</h1>";
     foreach($item['sections'] as $section){
+      // Multi-collection linking: fetch referenced collection data
+      if(isset($section['collection'])){
+        $section['items'] = fetchCollection($section['collection'], $section['limit'] ?? null);
+      }
       echo renderTemplate($section['type'], $section);
     }
     echo "</div>";
