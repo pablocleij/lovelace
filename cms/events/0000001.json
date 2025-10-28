@@ -1,0 +1,10 @@
+{
+  "id":"0000001",
+  "timestamp":"2025-10-28T17:00:00Z",
+  "actor":"ai-agent",
+  "instruction":"Initialize site",
+  "patches":[],
+  "previous_hash":"",
+  "hash":"",
+  "signature":""
+}
