@@ -45,4 +45,10 @@ if(in_array('add_to_navigation',$response['suggestions'])){
   file_put_contents('cms/config/navigation.json',json_encode($nav,JSON_PRETTY_PRINT));
 }
 
-echo json_encode(['message'=>$response['message'],'form'=>$response['form']??null]);
+// Proactive AI suggestions
+if($policy['suggest_improvements']){
+  $suggest=['Add SEO meta','Group navigation','Add footer'];
+  $response['suggestions'] = array_merge($response['suggestions'] ?? [], $suggest);
+}
+
+echo json_encode(['message'=>$response['message'],'form'=>$response['form']??null,'suggestions'=>$response['suggestions']??[]]);
