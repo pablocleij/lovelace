@@ -1,0 +1,43 @@
+{
+  "description": "Example of AI-generated form with default values",
+  "example_form": {
+    "fields": [
+      {
+        "name": "title",
+        "label": "Page Title",
+        "type": "string",
+        "default": "New Page"
+      },
+      {
+        "name": "author",
+        "label": "Author",
+        "type": "string",
+        "default": "Admin"
+      },
+      {
+        "name": "date",
+        "label": "Date",
+        "type": "date",
+        "default": "2025-10-28"
+      },
+      {
+        "name": "category",
+        "label": "Category",
+        "type": "string",
+        "default": "General"
+      },
+      {
+        "name": "price",
+        "label": "Price",
+        "type": "number",
+        "default": "0.00"
+      }
+    ]
+  },
+  "notes": [
+    "Default values are AI-suggested based on field name and context",
+    "Defaults are pre-filled in the frontend for better UX",
+    "Users can override defaults before submitting",
+    "Smart defaults include: current date, common categories, zero prices, etc."
+  ]
+}

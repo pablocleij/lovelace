@@ -109,10 +109,34 @@ function validateAndGenerateForm($schemaName, $data){
 
   $form = ['fields'=>[]];
 
+  // AI clarification with defaults: generate smart defaults based on context
+  $defaults = [
+    'title' => 'New Page',
+    'name' => 'Untitled',
+    'author' => 'Admin',
+    'date' => date('Y-m-d'),
+    'content' => '',
+    'description' => '',
+    'category' => 'General',
+    'price' => '0.00',
+    'inStock' => true
+  ];
+
   // Check for missing fields
   foreach($schema['fields'] as $f=>$type){
     if(!isset($data[$f])){
-      $form['fields'][]=["name"=>$f,"label"=>$f,"type"=>$type];
+      $field = [
+        "name" => $f,
+        "label" => ucfirst(str_replace('_', ' ', $f)),
+        "type" => $type
+      ];
+
+      // Add AI-suggested default value if available
+      if(isset($defaults[$f])){
+        $field['default'] = $defaults[$f];
+      }
+
+      $form['fields'][] = $field;
     }
   }
 

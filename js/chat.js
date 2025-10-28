@@ -18,9 +18,59 @@ input.addEventListener('keydown', async (e) => {
 
     if(res.form){
       const f = document.createElement('form');
+      f.style.border = '1px solid #ccc';
+      f.style.padding = '12px';
+      f.style.margin = '8px 0';
+      f.style.borderRadius = '4px';
+      f.style.backgroundColor = '#f9f9f9';
+
+      const formTitle = document.createElement('div');
+      formTitle.textContent = 'Please provide additional information:';
+      formTitle.style.fontWeight = 'bold';
+      formTitle.style.marginBottom = '8px';
+      f.appendChild(formTitle);
+
       res.form.fields.forEach(fld=>{
-        const input=document.createElement('input'); input.placeholder=fld.label; f.appendChild(input);
+        const fieldContainer = document.createElement('div');
+        fieldContainer.style.marginBottom = '8px';
+
+        const label = document.createElement('label');
+        label.textContent = fld.label;
+        label.style.display = 'block';
+        label.style.marginBottom = '4px';
+        label.style.fontSize = '0.9em';
+        fieldContainer.appendChild(label);
+
+        const input = document.createElement('input');
+        input.name = fld.name;
+        input.placeholder = fld.label;
+        input.type = fld.type === 'number' ? 'number' : 'text';
+        input.style.width = '100%';
+        input.style.padding = '6px';
+        input.style.border = '1px solid #ddd';
+        input.style.borderRadius = '3px';
+
+        // Pre-fill with AI-suggested default value
+        if(fld.default !== undefined && fld.default !== null){
+          input.value = fld.default;
+          input.style.color = '#666';
+        }
+
+        fieldContainer.appendChild(input);
+        f.appendChild(fieldContainer);
       });
+
+      const submitBtn = document.createElement('button');
+      submitBtn.textContent = 'Submit';
+      submitBtn.type = 'submit';
+      submitBtn.style.padding = '8px 16px';
+      submitBtn.style.backgroundColor = '#1a73e8';
+      submitBtn.style.color = 'white';
+      submitBtn.style.border = 'none';
+      submitBtn.style.borderRadius = '4px';
+      submitBtn.style.cursor = 'pointer';
+      f.appendChild(submitBtn);
+
       container.appendChild(f);
     }
 
