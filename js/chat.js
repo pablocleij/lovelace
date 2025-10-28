@@ -10,6 +10,54 @@ input.placeholder = "Type your message... (e.g., 'Create a homepage' or 'Add a b
 inputWrapper.appendChild(input);
 document.body.appendChild(inputWrapper);
 
+// Show AI greeting on first boot
+async function showGreeting(){
+  try {
+    const greetingConfig = await fetch('cms/config/greeting.json').then(r => r.json());
+
+    if(!greetingConfig.enabled) return;
+
+    // Check if we should show greeting (no events or first load)
+    const eventsResponse = await fetch('cms/events/').then(r => r.text());
+    const hasEvents = eventsResponse.includes('0000002.json'); // More than just init event
+
+    if(hasEvents && !greetingConfig.show_on_first_load) return;
+
+    // Display greeting message
+    const greetingDiv = document.createElement('div');
+    greetingDiv.className = 'chat-message bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-500 p-6 rounded-r-lg mb-4 shadow-md';
+    greetingDiv.innerHTML = `
+      <div class="font-bold text-green-900 mb-2 text-lg">👋 Welcome to lovelace</div>
+      <div class="text-gray-800 mb-4">${greetingConfig.message}</div>
+      <div class="text-sm font-semibold text-gray-700 mb-2">Quick start suggestions:</div>
+    `;
+
+    // Add suggestion buttons
+    const suggestionsContainer = document.createElement('div');
+    suggestionsContainer.className = 'flex flex-wrap gap-2';
+
+    greetingConfig.suggestions.forEach(suggestion => {
+      const btn = document.createElement('button');
+      btn.textContent = suggestion;
+      btn.className = 'px-3 py-2 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 hover:border-blue-400 transition';
+      btn.addEventListener('click', () => {
+        input.value = suggestion;
+        input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+      });
+      suggestionsContainer.appendChild(btn);
+    });
+
+    greetingDiv.appendChild(suggestionsContainer);
+    container.appendChild(greetingDiv);
+  } catch(e) {
+    // Silently fail if greeting config doesn't exist
+    console.log('No greeting config found');
+  }
+}
+
+// Show greeting when page loads
+showGreeting();
+
 input.addEventListener('keydown', async (e) => {
   if(e.key === 'Enter'){
     const msg = input.value;

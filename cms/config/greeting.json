@@ -1,0 +1,12 @@
+{
+  "enabled": true,
+  "message": "Hi! I'm lovelace, your conversational CMS assistant. I can help you build and manage your website through natural conversation.",
+  "suggestions": [
+    "Create a homepage with a hero section",
+    "Add a blog with recent posts",
+    "Generate an about page",
+    "Set up a contact form"
+  ],
+  "show_on_empty_events": true,
+  "show_on_first_load": true
+}
