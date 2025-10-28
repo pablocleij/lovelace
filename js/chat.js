@@ -41,22 +41,65 @@ input.addEventListener('keydown', async (e) => {
         label.style.fontSize = '0.9em';
         fieldContainer.appendChild(label);
 
-        const input = document.createElement('input');
-        input.name = fld.name;
-        input.placeholder = fld.label;
-        input.type = fld.type === 'number' ? 'number' : 'text';
-        input.style.width = '100%';
-        input.style.padding = '6px';
-        input.style.border = '1px solid #ddd';
-        input.style.borderRadius = '3px';
+        // Handle file upload fields
+        if(fld.type === 'file' || fld.type === 'image'){
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.name = fld.name;
+          fileInput.accept = 'image/*';
+          fileInput.style.width = '100%';
+          fileInput.style.padding = '6px';
+          fileInput.style.border = '1px solid #ddd';
+          fileInput.style.borderRadius = '3px';
 
-        // Pre-fill with AI-suggested default value
-        if(fld.default !== undefined && fld.default !== null){
-          input.value = fld.default;
-          input.style.color = '#666';
+          // File upload handler
+          fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(file){
+              const formData = new FormData();
+              formData.append('asset', file);
+
+              const uploadRes = await fetch('upload.php', {
+                method: 'POST',
+                body: formData
+              }).then(r=>r.json());
+
+              if(uploadRes.success){
+                // Store the uploaded path
+                fileInput.dataset.uploadedPath = uploadRes.path;
+                const preview = document.createElement('div');
+                preview.textContent = '✓ Uploaded: ' + uploadRes.path;
+                preview.style.color = 'green';
+                preview.style.fontSize = '0.8em';
+                preview.style.marginTop = '4px';
+                fieldContainer.appendChild(preview);
+              } else {
+                alert('Upload failed: ' + (uploadRes.error || 'Unknown error'));
+              }
+            }
+          });
+
+          fieldContainer.appendChild(fileInput);
+        } else {
+          // Regular input field
+          const input = document.createElement('input');
+          input.name = fld.name;
+          input.placeholder = fld.label;
+          input.type = fld.type === 'number' ? 'number' : 'text';
+          input.style.width = '100%';
+          input.style.padding = '6px';
+          input.style.border = '1px solid #ddd';
+          input.style.borderRadius = '3px';
+
+          // Pre-fill with AI-suggested default value
+          if(fld.default !== undefined && fld.default !== null){
+            input.value = fld.default;
+            input.style.color = '#666';
+          }
+
+          fieldContainer.appendChild(input);
         }
 
-        fieldContainer.appendChild(input);
         f.appendChild(fieldContainer);
       });
 

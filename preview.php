@@ -126,6 +126,22 @@ function renderTemplate($type, $data){
   $template = json_decode(file_get_contents($templatePath), true);
   $html = $template['html'];
 
+  // Handle conditional sections for optional fields {{#key}}...{{/key}}
+  foreach($data as $key=>$value){
+    if(!is_array($value)){
+      $pattern = "/{{#{$key}}}(.+?){{\\/{$key}}}/s";
+      if(preg_match($pattern, $html, $matches)){
+        // If value exists and is not empty, keep the content
+        if(!empty($value)){
+          $html = str_replace($matches[0], $matches[1], $html);
+        } else {
+          // Remove the conditional section
+          $html = str_replace($matches[0], '', $html);
+        }
+      }
+    }
+  }
+
   // Replace simple placeholders {{key}}
   foreach($data as $key=>$value){
     if(!is_array($value)){

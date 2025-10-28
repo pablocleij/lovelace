@@ -1,0 +1,49 @@
+{
+  "description": "Asset management guide for lovelace CMS",
+  "asset_structure": {
+    "root": "/assets/",
+    "categories": {
+      "images": "/assets/images/ - Photos, screenshots, banners",
+      "icons": "/assets/icons/ - SVG icons, logos",
+      "documents": "/assets/documents/ - PDFs, files"
+    }
+  },
+  "upload_constraints": {
+    "max_file_size": "5MB",
+    "allowed_types": ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp"],
+    "naming": "Original filename + timestamp for uniqueness"
+  },
+  "usage_in_collections": {
+    "hero_section_example": {
+      "type": "hero",
+      "title": "Welcome to Our Site",
+      "subtitle": "Launch fast",
+      "image": "/assets/images/hero1.png"
+    },
+    "product_example": {
+      "name": "Premium Widget",
+      "price": 29.99,
+      "image": "/assets/images/product_widget.jpg",
+      "icon": "/assets/icons/widget-icon.svg"
+    }
+  },
+  "ai_workflow": {
+    "steps": [
+      "1. AI detects need for image (e.g., 'Add hero section with background image')",
+      "2. AI generates form with field type 'image' or 'file'",
+      "3. User uploads file through generated form",
+      "4. upload.php processes and stores file in /assets/",
+      "5. Returns asset path (e.g., '/assets/images/hero1_1730000000.png')",
+      "6. AI includes asset path in collection item data",
+      "7. Templates render images using the asset path"
+    ]
+  },
+  "form_field_example": {
+    "name": "image",
+    "label": "Hero Background Image",
+    "type": "image"
+  },
+  "template_rendering": {
+    "hero_with_image": "<section class='hero' style='background-image:url({{image}})'><h1>{{title}}</h1><p>{{subtitle}}</p></section>"
+  }
+}
