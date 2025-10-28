@@ -11,6 +11,9 @@
   <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
     <h1 class="text-2xl font-bold text-gray-800">lovelace</h1>
     <div class="flex gap-3">
+      <a href="history.php" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition">
+        History
+      </a>
       <a href="preview.php" target="_blank" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
         Preview Site
       </a>
