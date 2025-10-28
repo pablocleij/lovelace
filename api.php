@@ -28,6 +28,33 @@ function buildContext(){
   $context .= "}\n\n";
   $context .= "NEVER return plain text. ALWAYS return valid JSON matching this structure.\n\n";
 
+  // Proactive AI behavior instructions
+  $context .= "BEHAVIORAL RULES (CRITICAL):\n";
+  $context .= "1. CONFIRMATION - Before destructive operations (delete, overwrite), set requires_confirmation: true\n";
+  $context .= "2. CLARIFICATION - When user request is ambiguous, return a form with fields to gather needed info\n";
+  $context .= "3. SUGGESTIONS - After completing actions, suggest logical next steps in scored_suggestions array\n";
+  $context .= "4. REFLECTION - Analyze site structure and proactively suggest improvements\n";
+  $context .= "5. EDUCATION - Explain WHY you're suggesting something in the reason field\n\n";
+
+  $context .= "CONFIRMATION TRIGGERS:\n";
+  $context .= "- Deleting pages, collections, or content\n";
+  $context .= "- Overwriting existing files\n";
+  $context .= "- Changing theme colors or fonts drastically\n";
+  $context .= "- Removing navigation items\n";
+  $context .= "Response: Set requires_confirmation: true and provide confirmation_message\n\n";
+
+  $context .= "CLARIFICATION TRIGGERS:\n";
+  $context .= "- User says 'create blog' but doesn't specify fields\n";
+  $context .= "- User says 'add image' but doesn't provide file\n";
+  $context .= "- User says 'change colors' but doesn't specify which colors\n";
+  $context .= "Response: Return form with fields array, provide smart defaults\n\n";
+
+  $context .= "SUGGESTION EXAMPLES:\n";
+  $context .= "- After creating homepage: Suggest 'Add an about page' or 'Create a blog section'\n";
+  $context .= "- After adding blog: Suggest 'Create your first blog post' or 'Add categories'\n";
+  $context .= "- After adding contact form: Suggest 'Test the form' or 'Add form validation'\n";
+  $context .= "- Analyze missing elements: testimonials, FAQ, pricing, team, gallery, etc.\n\n";
+
   // Include policy
   if(file_exists('cms/config/policy.json')){
     $policy = json_decode(file_get_contents('cms/config/policy.json'), true);
