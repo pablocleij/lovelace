@@ -17,6 +17,7 @@ function mergeSchema($schemaName){
 }
 
 $events = glob('cms/events/*.json');
+sort($events); // Process in chronological order
 $site = [];
 // $pubKey = load from cms/config/keypair.pub
 foreach($events as $file){
@@ -30,12 +31,23 @@ foreach($events as $file){
     }
   }
 
+  $eventId = $e['id'];
+
   foreach($e['patches'] as $patch){
     if($patch['op']=='create_collection'){
       mkdir('cms/collections/'.$patch['target'], 0777, true);
     }
     if($patch['op']=='create_file'){
-      file_put_contents('cms/'.$patch['target'], json_encode($patch['value'], JSON_PRETTY_PRINT));
+      $filePath = 'cms/'.$patch['target'];
+      file_put_contents($filePath, json_encode($patch['value'], JSON_PRETTY_PRINT));
+
+      // File versioning: create snapshot per event ID
+      $versionPath = pathinfo($filePath, PATHINFO_DIRNAME) . '/' . pathinfo($filePath, PATHINFO_FILENAME);
+      $versionDir = str_replace('cms/collections/', 'cms/snapshots/', $versionPath);
+      if(!file_exists($versionDir)){
+        mkdir($versionDir, 0777, true);
+      }
+      file_put_contents("{$versionDir}/{$eventId}.json", json_encode($patch['value'], JSON_PRETTY_PRINT));
     }
     if($patch['op']=='update_theme'){
       $theme = json_decode(file_get_contents('cms/config/theme.json'), true);
