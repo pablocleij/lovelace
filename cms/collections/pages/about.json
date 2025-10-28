@@ -1,0 +1,7 @@
+{
+  "title":"About",
+  "sections":[
+    {"type":"hero","title":"About Us","subtitle":"Learn more about our mission"},
+    {"type":"features","items":[{"title":"Our Story","desc":"Founded in 2025"},{"title":"Our Team","desc":"Passionate developers"}]}
+  ]
+}

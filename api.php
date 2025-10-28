@@ -184,6 +184,22 @@ foreach($response['event']['patches'] ?? [] as $patch){
 
 writeEvent($response['event']);
 
+// Dynamic navigation: automatically update based on pages collection
+$pagesDir = 'cms/collections/pages';
+if(is_dir($pagesDir)){
+  $nav = [];
+  foreach(glob("{$pagesDir}/*.json") as $f){
+    $page = json_decode(file_get_contents($f), true);
+    if(isset($page['title'])){
+      $nav[] = [
+        'title' => $page['title'],
+        'slug' => pathinfo($f, PATHINFO_FILENAME)
+      ];
+    }
+  }
+  file_put_contents('cms/config/navigation.json', json_encode($nav, JSON_PRETTY_PRINT));
+}
+
 if(in_array('add_to_navigation',$response['suggestions'])){
   $nav=json_decode(file_get_contents('cms/config/navigation.json'),true);
   $nav[]=$response['page'];

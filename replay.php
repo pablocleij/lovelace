@@ -62,3 +62,19 @@ $collections=glob('cms/collections/*/*.json');
 $snap=[];
 foreach($collections as $file){ $snap[] = json_decode(file_get_contents($file),true); }
 file_put_contents('cms/snapshots/latest.json',json_encode($snap,JSON_PRETTY_PRINT));
+
+// Dynamic navigation: rebuild navigation from pages collection
+$pagesDir = 'cms/collections/pages';
+if(is_dir($pagesDir)){
+  $nav = [];
+  foreach(glob("{$pagesDir}/*.json") as $f){
+    $page = json_decode(file_get_contents($f), true);
+    if(isset($page['title'])){
+      $nav[] = [
+        'title' => $page['title'],
+        'slug' => pathinfo($f, PATHINFO_FILENAME)
+      ];
+    }
+  }
+  file_put_contents('cms/config/navigation.json', json_encode($nav, JSON_PRETTY_PRINT));
+}
