@@ -15,6 +15,7 @@ chatSidebar.appendChild(inputWrapper);
 async function showGreeting(){
   try {
     const greetingConfig = await fetch('cms/config/greeting.json').then(r => r.json());
+    const userProfile = await fetch('cms/config/user_profile.json').then(r => r.json());
 
     if(!greetingConfig.enabled) return;
 
@@ -27,15 +28,34 @@ async function showGreeting(){
     // Display greeting message
     const greetingDiv = document.createElement('div');
     greetingDiv.className = 'chat-message bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-500 p-6 rounded-r-lg mb-4 shadow-md';
+
+    // Personalized greeting if user has name
+    const greetingText = userProfile.name
+      ? `👋 Welcome back, ${userProfile.name}!`
+      : '👋 Welcome to lovelace';
+
     greetingDiv.innerHTML = `
-      <div class="font-bold text-green-900 mb-2 text-lg">👋 Welcome to lovelace</div>
+      <div class="font-bold text-green-900 mb-2 text-lg">${greetingText}</div>
       <div class="text-gray-800 mb-4">${greetingConfig.message}</div>
+      ${!userProfile.name ? '<div class="text-sm text-gray-600 mb-3 italic">💡 Tip: Tell me your name so I can personalize your experience!</div>' : ''}
       <div class="text-sm font-semibold text-gray-700 mb-2">Quick start suggestions:</div>
     `;
 
     // Add suggestion buttons
     const suggestionsContainer = document.createElement('div');
     suggestionsContainer.className = 'flex flex-wrap gap-2';
+
+    // Add "Set my name" button if no name is set
+    if(!userProfile.name){
+      const nameBtn = document.createElement('button');
+      nameBtn.textContent = '✏️ Set my name';
+      nameBtn.className = 'px-3 py-2 bg-blue-500 text-white border border-blue-600 rounded-md text-sm hover:bg-blue-600 transition font-semibold';
+      nameBtn.addEventListener('click', () => {
+        input.value = "My name is ";
+        input.focus();
+      });
+      suggestionsContainer.appendChild(nameBtn);
+    }
 
     greetingConfig.suggestions.forEach(suggestion => {
       const btn = document.createElement('button');

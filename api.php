@@ -8,7 +8,24 @@ $policy = json_decode(file_get_contents('cms/config/policy.json'), true);
 
 // Build context from event history and site state
 function buildContext(){
+  // Load user profile for personalization
+  $userProfile = file_exists('cms/config/user_profile.json')
+    ? json_decode(file_get_contents('cms/config/user_profile.json'), true)
+    : ['name' => '', 'site_name' => ''];
+
+  $userName = $userProfile['name'] ?? '';
+  $siteName = $userProfile['site_name'] ?? '';
+
   $context = "You are lovelace, a conversational AI CMS.\n\n";
+
+  // Add personalization context
+  if($userName || $siteName){
+    $context .= "USER CONTEXT:\n";
+    if($userName) $context .= "- User name: {$userName}\n";
+    if($siteName) $context .= "- Site name: {$siteName}\n";
+    $context .= "Use this information to personalize your responses.\n";
+    if($userName) $context .= "Greet the user by name in your responses when appropriate.\n\n";
+  }
 
   // CRITICAL: Enforce structured JSON response format
   $context .= "RESPONSE FORMAT (MANDATORY):\n";
@@ -65,6 +82,16 @@ function buildContext(){
   $context .= "3. Suggest creating a schema with update_schema operation\n";
   $context .= "4. Flag type mismatches if schema exists but doesn't match content\n";
   $context .= "5. Suggest adding missing fields found in content but not in schema\n\n";
+
+  $context .= "USER PROFILE MANAGEMENT:\n";
+  $context .= "When user says 'My name is [name]' or 'I'm [name]' or 'Call me [name]':\n";
+  $context .= "1. Extract the name from their message\n";
+  $context .= "2. Use update_config operation to save: {\"op\":\"update_config\",\"target\":\"user_profile.json\",\"value\":{\"name\":\"[name]\"},\"merge\":true}\n";
+  $context .= "3. Greet them by name and acknowledge the update\n";
+  $context .= "When user mentions their site name or asks to change it:\n";
+  $context .= "1. Extract site name from their message\n";
+  $context .= "2. Update user_profile.json with site_name field\n";
+  $context .= "Always use the user's name in future responses after it's been set.\n\n";
 
   $context .= "SUGGESTION EXAMPLES:\n";
   $context .= "- After creating homepage: Suggest 'Add an about page' or 'Create a blog section'\n";
