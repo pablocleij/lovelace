@@ -1,7 +1,0 @@
-{
-    "provider": "openai",
-    "key": "j3PwgID60GRNAdqPfwyziTo6c3dzRzV3SWc4L2l0STcrY2NFZ2JsZGJCUGNCVjBWWU5ldWFKQTh0OTlMSjJ6d1QwK25nYXRqaGpoWlN5V0xVWFRkK3dJVyt5QW5iRFRla3M4NkZ3UHZpbE9uYVBIblQwTmlyTnhybjh3T0ZkN0F0UFpCZzUzWUlyUDRtMzRVWGNoRG5sb0lrMmZTZittbEFNZGpNbk1RSXR1NVVjQlk4MGhQdDFCZDNyM1RaNUlBQk9OcTdVRll6VU5NeWdNNkhhNHh4MDBvV2w2Ui9qcnFPWFdmMkZuZjhEWStZeVBVQmlsci9rWllyN0QvQT0=",
-    "model": "gpt-4o",
-    "encrypted": true,
-    "last_updated": "2025-10-28T23:36:35+00:00"
-}
