@@ -123,6 +123,25 @@ function buildContext(){
   $context .= "  - /cms/collections/testimonials/ (directory)\n";
   $context .= "  - /cms/collections/testimonials/schema.json (schema file)\n\n";
 
+  $context .= "AVAILABLE PATCH OPERATIONS:\n";
+  $context .= "1. create_collection - Create new collection with optional schema\n";
+  $context .= "2. create_file - Create new file in collection or config\n";
+  $context .= "3. update_file - Update existing file (supports merge)\n";
+  $context .= "4. delete_file - Delete a file\n";
+  $context .= "5. delete_collection - Remove entire collection\n";
+  $context .= "6. update_schema - Update collection schema\n";
+  $context .= "7. add_field_to_schema - Add single field to schema\n";
+  $context .= "8. update_theme - Update theme configuration\n";
+  $context .= "9. update_navigation - Update site navigation\n";
+  $context .= "10. update_config - Update any config file\n";
+  $context .= "11. create_collection_item - Shorthand for creating items (auto-IDs)\n\n";
+
+  $context .= "OPERATION EXAMPLES:\n";
+  $context .= "Create collection: {\"op\":\"create_collection\",\"target\":\"testimonials\",\"schema\":{\"fields\":{\"name\":\"string\",\"quote\":\"string\"}}}\n";
+  $context .= "Add item: {\"op\":\"create_collection_item\",\"target\":\"posts\",\"value\":{\"title\":\"My Post\"}}\n";
+  $context .= "Update file: {\"op\":\"update_file\",\"target\":\"collections/pages/home.json\",\"value\":{\"title\":\"New Title\"},\"merge\":true}\n";
+  $context .= "Delete file: {\"op\":\"delete_file\",\"target\":\"collections/posts/old.json\"}\n\n";
+
   return $context;
 }
 

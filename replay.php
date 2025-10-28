@@ -91,11 +91,28 @@ foreach($events as $file){
   $eventId = $e['id'];
 
   foreach($e['patches'] as $patch){
-    if($patch['op']=='create_collection'){
-      mkdir('cms/collections/'.$patch['target'], 0777, true);
+    $op = $patch['op'];
+
+    // CREATE_COLLECTION: Create collection directory and optional schema
+    if($op == 'create_collection'){
+      $collectionPath = 'cms/collections/'.$patch['target'];
+      if(!file_exists($collectionPath)){
+        mkdir($collectionPath, 0777, true);
+      }
+
+      // Create schema if provided
+      if(isset($patch['schema'])){
+        file_put_contents("{$collectionPath}/schema.json", json_encode($patch['schema'], JSON_PRETTY_PRINT));
+      }
     }
-    if($patch['op']=='create_file'){
+
+    // CREATE_FILE: Create new file
+    else if($op == 'create_file'){
       $filePath = 'cms/'.$patch['target'];
+      $dir = dirname($filePath);
+      if(!file_exists($dir)){
+        mkdir($dir, 0777, true);
+      }
       file_put_contents($filePath, json_encode($patch['value'], JSON_PRETTY_PRINT));
 
       // File versioning: create snapshot per event ID
@@ -106,10 +123,119 @@ foreach($events as $file){
       }
       file_put_contents("{$versionDir}/{$eventId}.json", json_encode($patch['value'], JSON_PRETTY_PRINT));
     }
-    if($patch['op']=='update_theme'){
+
+    // UPDATE_FILE: Update existing file (merge or replace)
+    else if($op == 'update_file'){
+      $filePath = 'cms/'.$patch['target'];
+      if(file_exists($filePath)){
+        $merge = $patch['merge'] ?? false;
+        if($merge){
+          $existing = json_decode(file_get_contents($filePath), true);
+          $updated = array_merge_recursive($existing, $patch['value']);
+          file_put_contents($filePath, json_encode($updated, JSON_PRETTY_PRINT));
+        } else {
+          file_put_contents($filePath, json_encode($patch['value'], JSON_PRETTY_PRINT));
+        }
+      }
+    }
+
+    // DELETE_FILE: Remove file
+    else if($op == 'delete_file'){
+      $filePath = 'cms/'.$patch['target'];
+      if(file_exists($filePath)){
+        unlink($filePath);
+      }
+    }
+
+    // DELETE_COLLECTION: Remove entire collection
+    else if($op == 'delete_collection'){
+      $collectionPath = 'cms/collections/'.$patch['target'];
+      if(file_exists($collectionPath)){
+        // Recursively delete directory
+        $files = new RecursiveIteratorIterator(
+          new RecursiveDirectoryIterator($collectionPath, RecursiveDirectoryIterator::SKIP_DOTS),
+          RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach($files as $fileinfo){
+          $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+          $todo($fileinfo->getRealPath());
+        }
+        rmdir($collectionPath);
+      }
+    }
+
+    // UPDATE_SCHEMA: Update collection schema
+    else if($op == 'update_schema'){
+      $schemaPath = "cms/collections/{$patch['target']}/schema.json";
+      $merge = $patch['merge'] ?? true;
+      if($merge && file_exists($schemaPath)){
+        $existing = json_decode(file_get_contents($schemaPath), true);
+        $updated = array_merge_recursive($existing, $patch['value']);
+        file_put_contents($schemaPath, json_encode($updated, JSON_PRETTY_PRINT));
+      } else {
+        file_put_contents($schemaPath, json_encode($patch['value'], JSON_PRETTY_PRINT));
+      }
+    }
+
+    // ADD_FIELD_TO_SCHEMA: Add single field to schema
+    else if($op == 'add_field_to_schema'){
+      $schemaPath = "cms/collections/{$patch['target']}/schema.json";
+      if(file_exists($schemaPath)){
+        $schema = json_decode(file_get_contents($schemaPath), true);
+        $schema['fields'][$patch['field']] = $patch['type'];
+        file_put_contents($schemaPath, json_encode($schema, JSON_PRETTY_PRINT));
+      }
+    }
+
+    // UPDATE_THEME: Update theme config
+    else if($op == 'update_theme'){
       $theme = json_decode(file_get_contents('cms/config/theme.json'), true);
       $theme = array_merge_recursive($theme, $patch['value']);
       file_put_contents('cms/config/theme.json', json_encode($theme, JSON_PRETTY_PRINT));
+    }
+
+    // UPDATE_NAVIGATION: Update navigation
+    else if($op == 'update_navigation'){
+      $merge = $patch['merge'] ?? false;
+      if($merge && file_exists('cms/config/navigation.json')){
+        $existing = json_decode(file_get_contents('cms/config/navigation.json'), true);
+        $updated = array_merge($existing, $patch['value']);
+        file_put_contents('cms/config/navigation.json', json_encode($updated, JSON_PRETTY_PRINT));
+      } else {
+        file_put_contents('cms/config/navigation.json', json_encode($patch['value'], JSON_PRETTY_PRINT));
+      }
+    }
+
+    // UPDATE_CONFIG: Update any config file
+    else if($op == 'update_config'){
+      $configPath = "cms/config/{$patch['target']}";
+      $merge = $patch['merge'] ?? true;
+      if($merge && file_exists($configPath)){
+        $existing = json_decode(file_get_contents($configPath), true);
+        $updated = array_merge_recursive($existing, $patch['value']);
+        file_put_contents($configPath, json_encode($updated, JSON_PRETTY_PRINT));
+      } else {
+        file_put_contents($configPath, json_encode($patch['value'], JSON_PRETTY_PRINT));
+      }
+    }
+
+    // CREATE_COLLECTION_ITEM: Shorthand for creating collection item
+    else if($op == 'create_collection_item'){
+      $collectionPath = "cms/collections/{$patch['target']}";
+      if(!file_exists($collectionPath)){
+        mkdir($collectionPath, 0777, true);
+      }
+      // Generate auto-incrementing ID
+      $existing = glob("{$collectionPath}/*.json");
+      $maxId = 0;
+      foreach($existing as $file){
+        $basename = basename($file, '.json');
+        if(is_numeric($basename)){
+          $maxId = max($maxId, (int)$basename);
+        }
+      }
+      $newId = str_pad($maxId + 1, 4, '0', STR_PAD_LEFT);
+      file_put_contents("{$collectionPath}/{$newId}.json", json_encode($patch['value'], JSON_PRETTY_PRINT));
     }
   }
 }

@@ -1,0 +1,155 @@
+{
+  "description": "Complete list of supported patch operations for event sourcing",
+  "operations": {
+    "create_collection": {
+      "description": "Create a new collection directory with optional schema",
+      "parameters": {
+        "target": "Collection name (e.g., 'testimonials')",
+        "schema": "Optional schema definition object"
+      },
+      "example": {
+        "op": "create_collection",
+        "target": "testimonials",
+        "schema": {
+          "fields": {
+            "name": "string",
+            "company": "string",
+            "quote": "string",
+            "rating": "number"
+          }
+        }
+      }
+    },
+    "create_file": {
+      "description": "Create a new file in a collection or config",
+      "parameters": {
+        "target": "File path relative to cms/ (e.g., 'collections/posts/001.json')",
+        "value": "JSON content to write",
+        "schema": "Optional schema name for validation"
+      },
+      "example": {
+        "op": "create_file",
+        "target": "collections/pages/home.json",
+        "value": {"title": "Home", "content": "Welcome!"}
+      }
+    },
+    "update_file": {
+      "description": "Update an existing file (merge or replace)",
+      "parameters": {
+        "target": "File path relative to cms/",
+        "value": "New JSON content",
+        "merge": "Boolean - merge with existing (default: false)"
+      },
+      "example": {
+        "op": "update_file",
+        "target": "collections/pages/home.json",
+        "value": {"title": "New Title"},
+        "merge": true
+      }
+    },
+    "delete_file": {
+      "description": "Delete a file from collection or config",
+      "parameters": {
+        "target": "File path relative to cms/"
+      },
+      "example": {
+        "op": "delete_file",
+        "target": "collections/posts/old-post.json"
+      }
+    },
+    "delete_collection": {
+      "description": "Delete an entire collection and all its contents",
+      "parameters": {
+        "target": "Collection name"
+      },
+      "example": {
+        "op": "delete_collection",
+        "target": "testimonials"
+      }
+    },
+    "update_schema": {
+      "description": "Update a collection's schema",
+      "parameters": {
+        "target": "Collection name",
+        "value": "New schema definition",
+        "merge": "Boolean - merge with existing (default: true)"
+      },
+      "example": {
+        "op": "update_schema",
+        "target": "posts",
+        "value": {"fields": {"tags": "list"}},
+        "merge": true
+      }
+    },
+    "add_field_to_schema": {
+      "description": "Add a single field to collection schema",
+      "parameters": {
+        "target": "Collection name",
+        "field": "Field name",
+        "type": "Field type (string, number, boolean, list)"
+      },
+      "example": {
+        "op": "add_field_to_schema",
+        "target": "posts",
+        "field": "featured",
+        "type": "boolean"
+      }
+    },
+    "update_theme": {
+      "description": "Update theme configuration",
+      "parameters": {
+        "value": "Theme properties to update"
+      },
+      "example": {
+        "op": "update_theme",
+        "value": {"colors": {"primary": "#4f46e5"}}
+      }
+    },
+    "update_navigation": {
+      "description": "Update site navigation structure",
+      "parameters": {
+        "value": "New navigation array",
+        "merge": "Boolean - merge with existing (default: false)"
+      },
+      "example": {
+        "op": "update_navigation",
+        "value": [{"title": "Home", "slug": "home"}]
+      }
+    },
+    "update_config": {
+      "description": "Update any config file",
+      "parameters": {
+        "target": "Config file name (e.g., 'policy.json')",
+        "value": "New config values",
+        "merge": "Boolean - merge with existing (default: true)"
+      },
+      "example": {
+        "op": "update_config",
+        "target": "policy.json",
+        "value": {"suggest_improvements": false},
+        "merge": true
+      }
+    },
+    "create_collection_item": {
+      "description": "Shorthand for creating an item in a collection",
+      "parameters": {
+        "target": "Collection name",
+        "value": "Item data",
+        "schema": "Optional schema name"
+      },
+      "example": {
+        "op": "create_collection_item",
+        "target": "posts",
+        "value": {"title": "My Post", "content": "..."}
+      }
+    }
+  },
+  "validation_rules": [
+    "All operations must have 'op' and 'target' fields",
+    "create_* operations require 'value' field",
+    "update_* operations require 'value' field",
+    "delete_* operations only need 'target'",
+    "Schema operations validate schema structure",
+    "File paths must be relative to cms/ directory"
+  ]
+}
