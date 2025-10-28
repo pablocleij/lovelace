@@ -163,6 +163,31 @@ input.addEventListener('keydown', async (e) => {
       submitBtn.className = 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition cursor-pointer mt-2';
       f.appendChild(submitBtn);
 
+      // Form submission handler
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(f);
+        const formValues = {};
+
+        for(let [key, value] of formData.entries()){
+          // Check if this was a file upload field
+          const fileInput = f.querySelector(`input[name="${key}"]`);
+          if(fileInput && fileInput.dataset.uploadedPath){
+            formValues[key] = fileInput.dataset.uploadedPath;
+          } else {
+            formValues[key] = value;
+          }
+        }
+
+        // Build natural language command from form data
+        let command = res.message + ' with ';
+        command += Object.entries(formValues).map(([k,v]) => `${k}: ${v}`).join(', ');
+
+        input.value = command;
+        input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+        f.remove();
+      });
+
       container.appendChild(f);
     }
 

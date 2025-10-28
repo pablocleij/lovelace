@@ -343,6 +343,23 @@ foreach($response['event']['patches'] ?? [] as $patch){
   }
 }
 
+// Persist dynamic forms to /cms/forms/ for audit trail
+if(isset($response['form']) && $response['form'] !== null){
+  $formId = $response['event']['id'];
+  $formTimestamp = time();
+  $formFilename = "form_{$formId}_{$formTimestamp}.json";
+
+  $formData = [
+    'event_id' => $response['event']['id'],
+    'timestamp' => date('c'),
+    'instruction' => $response['event']['instruction'],
+    'form' => $response['form'],
+    'submitted' => false
+  ];
+
+  file_put_contents("cms/forms/{$formFilename}", json_encode($formData, JSON_PRETTY_PRINT));
+}
+
 writeEvent($response['event']);
 
 // Dynamic navigation: automatically update based on pages collection
