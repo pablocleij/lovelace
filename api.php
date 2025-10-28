@@ -305,6 +305,9 @@ function callLLM($provider, $apiKey, $model, $systemPrompt, $userMessage){
 
 $data = json_decode(file_get_contents('php://input'), true);
 
+// Check if streaming is requested
+$isStreaming = $data['stream'] ?? false;
+
 // Handle confirmed requests (bypass confirmation check)
 $isConfirmed = $data['confirmed'] ?? false;
 $pendingEvent = $data['pending_event'] ?? null;
@@ -323,7 +326,33 @@ if($isConfirmed && $pendingEvent){
 // Build proactive memory context from event history
 $contextPrompt = buildContext();
 
-// Call the configured LLM provider
+// Streaming response support
+if($isStreaming){
+  header('Content-Type: text/event-stream');
+  header('Cache-Control: no-cache');
+  header('X-Accel-Buffering: no'); // Disable nginx buffering
+
+  // For streaming, we'll send the message first, then the structured response
+  echo "data: " . json_encode(['type' => 'start']) . "\n\n";
+  flush();
+
+  // Call LLM and get response
+  $aiMessage = callLLM($provider, $apiKey, $model, $contextPrompt, $data['message']);
+
+  // Send response in chunks
+  $chunks = str_split($aiMessage, 50);  // Split into 50-char chunks for streaming effect
+  foreach($chunks as $chunk){
+    echo "data: " . json_encode(['type' => 'chunk', 'content' => $chunk]) . "\n\n";
+    flush();
+    usleep(30000); // 30ms delay for visual streaming effect
+  }
+
+  echo "data: " . json_encode(['type' => 'end']) . "\n\n";
+  flush();
+  exit;
+}
+
+// Call the configured LLM provider (non-streaming)
 $aiMessage = callLLM($provider, $apiKey, $model, $contextPrompt, $data['message']);
 $response = json_decode($aiMessage, true);
 

@@ -113,6 +113,18 @@
   60%, 100% { content: '...'; }
 }
 
+/* Typing indicator for streaming */
+.typing-indicator {
+  color: #6b7280;
+  font-style: italic;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

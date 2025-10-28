@@ -81,6 +81,74 @@ if(refreshBtn){
   refreshBtn.addEventListener('click', refreshPreview);
 }
 
+// Streaming AI response handler
+async function streamAIResponse(msg){
+  // Create AI message bubble
+  const botDiv = document.createElement('div');
+  botDiv.className = 'chat-message bg-white border-l-4 border-green-500 p-4 rounded-r-lg mb-4 shadow-sm';
+  botDiv.innerHTML = `<div class="font-semibold text-green-900 mb-1">lovelace AI</div><div class="text-gray-800" id="ai-streaming-content"></div>`;
+  container.appendChild(botDiv);
+
+  const contentDiv = botDiv.querySelector('#ai-streaming-content');
+
+  // Show typing indicator
+  contentDiv.innerHTML = '<span class="typing-indicator">AI is typing...</span>';
+  container.scrollTop = container.scrollHeight;
+
+  try {
+    const response = await fetch('api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'chat', message: msg, stream: true})
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullMessage = '';
+
+    contentDiv.innerHTML = ''; // Clear typing indicator
+
+    while(true){
+      const {done, value} = await reader.read();
+      if(done) break;
+
+      buffer += decoder.decode(value, {stream: true});
+      const lines = buffer.split('\n\n');
+      buffer = lines.pop(); // Keep incomplete line in buffer
+
+      for(const line of lines){
+        if(line.startsWith('data: ')){
+          const data = JSON.parse(line.slice(6));
+
+          if(data.type === 'chunk'){
+            fullMessage += data.content;
+            contentDiv.textContent = fullMessage;
+            container.scrollTop = container.scrollHeight;
+          } else if(data.type === 'end'){
+            // Streaming complete, now get the structured response
+            break;
+          }
+        }
+      }
+    }
+
+    // After streaming display, get the structured response for forms/suggestions
+    const structuredRes = await fetch('api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'chat', message: msg})
+    }).then(r => r.json());
+
+    return structuredRes;
+
+  } catch(error){
+    contentDiv.textContent = 'Error: Could not connect to AI';
+    console.error(error);
+    return null;
+  }
+}
+
 input.addEventListener('keydown', async (e) => {
   if(e.key === 'Enter'){
     const msg = input.value;
@@ -94,17 +162,12 @@ input.addEventListener('keydown', async (e) => {
     container.appendChild(userDiv);
     container.scrollTop = container.scrollHeight;
 
-    const res = await fetch('api.php', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({action:'chat', message: msg})
-    }).then(r=>r.json());
+    // Use streaming response
+    const res = await streamAIResponse(msg);
+    if(!res) return;
 
-    // AI message with Tailwind styling
-    const botDiv = document.createElement('div');
-    botDiv.className = 'chat-message bg-white border-l-4 border-green-500 p-4 rounded-r-lg mb-4 shadow-sm';
-    botDiv.innerHTML = `<div class="font-semibold text-green-900 mb-1">lovelace AI</div><div class="text-gray-800">${res.message}</div>`;
-    container.appendChild(botDiv);
-    container.scrollTop = container.scrollHeight;
+    // Auto-refresh preview after response
+    refreshPreview();
 
     // Handle confirmation requests
     if(res.requires_confirmation){
