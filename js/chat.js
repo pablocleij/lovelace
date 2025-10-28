@@ -23,5 +23,37 @@ input.addEventListener('keydown', async (e) => {
       });
       container.appendChild(f);
     }
+
+    // Render scored suggestions
+    if(res.scored_suggestions && res.scored_suggestions.length > 0){
+      const suggestDiv = document.createElement('div');
+      suggestDiv.className = 'suggestions';
+      suggestDiv.innerHTML = '<strong>Suggestions:</strong>';
+
+      res.scored_suggestions.forEach((suggestion, index) => {
+        const suggestionItem = document.createElement('div');
+        suggestionItem.className = 'suggestion-item';
+        suggestionItem.style.cursor = 'pointer';
+        suggestionItem.style.padding = '8px';
+        suggestionItem.style.margin = '4px 0';
+        suggestionItem.style.border = '1px solid #ddd';
+        suggestionItem.style.borderRadius = '4px';
+
+        const scorePercent = Math.round(suggestion.score * 100);
+        suggestionItem.innerHTML = `
+          <span style="font-weight:bold">${index + 1}. ${suggestion.message}</span>
+          <span style="float:right;color:#666;font-size:0.9em">${scorePercent}%</span>
+        `;
+
+        suggestionItem.addEventListener('click', () => {
+          input.value = suggestion.message;
+          input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+        });
+
+        suggestDiv.appendChild(suggestionItem);
+      });
+
+      container.appendChild(suggestDiv);
+    }
   }
 });

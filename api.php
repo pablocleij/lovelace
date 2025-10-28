@@ -196,9 +196,21 @@ if($policy['suggest_improvements']){
   $response['suggestions'] = array_merge($response['suggestions'] ?? [], $suggest);
 }
 
+// AI suggestion scoring: sort and rank suggestions
+$scoredSuggestions = $response['scored_suggestions'] ?? [];
+if(!empty($scoredSuggestions)){
+  // Sort by score descending
+  usort($scoredSuggestions, function($a, $b){
+    return ($b['score'] ?? 0) <=> ($a['score'] ?? 0);
+  });
+  // Limit to top 5 suggestions
+  $scoredSuggestions = array_slice($scoredSuggestions, 0, 5);
+}
+
 echo json_encode([
   'message'=>$response['message'],
   'form'=>$response['form']??null,
   'suggestions'=>$response['suggestions']??[],
+  'scored_suggestions'=>$scoredSuggestions,
   'error'=>$response['error']??null
 ]);

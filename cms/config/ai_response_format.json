@@ -1,0 +1,41 @@
+{
+  "description": "Example AI response format with scored suggestions",
+  "example": {
+    "message": "I've analyzed your site and have several improvement suggestions.",
+    "event": {
+      "id": "0000010",
+      "timestamp": "2025-10-28T18:00:00Z",
+      "actor": "ai-agent",
+      "instruction": "Analyze site for improvements",
+      "patches": []
+    },
+    "scored_suggestions": [
+      {
+        "message": "Add meta descriptions to all pages for better SEO",
+        "score": 0.95
+      },
+      {
+        "message": "Create a contact form on the About page",
+        "score": 0.88
+      },
+      {
+        "message": "Group navigation items under 'Services' category",
+        "score": 0.82
+      },
+      {
+        "message": "Add social media links to the footer",
+        "score": 0.75
+      },
+      {
+        "message": "Compress images for faster page load",
+        "score": 0.70
+      }
+    ]
+  },
+  "notes": [
+    "scored_suggestions is an array of objects with 'message' and 'score' fields",
+    "score is a float between 0 and 1 (0.95 = 95% confidence/priority)",
+    "Backend automatically sorts by score and limits to top 5",
+    "Frontend displays suggestions as clickable items with score percentages"
+  ]
+}
