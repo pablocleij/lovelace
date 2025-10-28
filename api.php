@@ -57,6 +57,15 @@ function buildContext(){
   $context .= "- User mentions 'FAQ', 'portfolio', 'events', 'services' → create corresponding collections\n";
   $context .= "Response: Use create_collection with inferred schema, add 1 example item, return form for real data\n\n";
 
+  $context .= "SCHEMA INFERENCE CAPABILITIES:\n";
+  $context .= "You can infer schemas from existing content for collections without schemas.\n";
+  $context .= "When you detect a collection with items but no schema:\n";
+  $context .= "1. Analyze field types from actual content (string, number, boolean, list, object)\n";
+  $context .= "2. Check for type consistency across all items\n";
+  $context .= "3. Suggest creating a schema with update_schema operation\n";
+  $context .= "4. Flag type mismatches if schema exists but doesn't match content\n";
+  $context .= "5. Suggest adding missing fields found in content but not in schema\n\n";
+
   $context .= "SUGGESTION EXAMPLES:\n";
   $context .= "- After creating homepage: Suggest 'Add an about page' or 'Create a blog section'\n";
   $context .= "- After adding blog: Suggest 'Create your first blog post' or 'Add categories'\n";
@@ -115,6 +124,28 @@ function buildContext(){
         $sectionTypes = array_map(function($s){ return $s['type'] ?? 'unknown'; }, $page['sections']);
         $context .= "- Page '{$basename}' has sections: " . implode(', ', $sectionTypes) . "\n";
       }
+    }
+  }
+  $context .= "\n";
+
+  // Schema analysis: check all collections for schema issues
+  $context .= "SCHEMA ANALYSIS:\n";
+  $collections = glob('cms/collections/*', GLOB_ONLYDIR);
+  foreach($collections as $collectionPath){
+    $collectionName = basename($collectionPath);
+    $schemaPath = "{$collectionPath}/schema.json";
+    $hasSchema = file_exists($schemaPath);
+    $itemCount = count(glob("{$collectionPath}/*.json")) - ($hasSchema ? 1 : 0);
+
+    $context .= "- Collection '{$collectionName}': ";
+    if(!$hasSchema && $itemCount > 0){
+      $context .= "NO SCHEMA (has {$itemCount} items) - consider inferring schema\n";
+    } else if($hasSchema && $itemCount === 0){
+      $context .= "Has schema but no items\n";
+    } else if($hasSchema && $itemCount > 0){
+      $context .= "✓ {$itemCount} items with schema\n";
+    } else {
+      $context .= "Empty collection\n";
     }
   }
   $context .= "\n";
@@ -248,6 +279,133 @@ function getCollectionTemplate($collectionType){
 
   $type = strtolower(trim($collectionType));
   return $templates['templates'][$type] ?? null;
+}
+
+// Infer schema from existing content items
+function inferSchemaFromContent($items){
+  if(empty($items)) return ['fields' => []];
+
+  $fieldTypes = [];
+
+  // Analyze all items to determine field types
+  foreach($items as $item){
+    foreach($item as $field => $value){
+      // Skip meta fields
+      if(in_array($field, ['id', '_id', 'created_at', 'updated_at'])) continue;
+
+      $type = gettype($value);
+
+      // Map PHP types to schema types
+      $schemaType = match($type){
+        'integer', 'double' => 'number',
+        'boolean' => 'boolean',
+        'array' => is_numeric(array_keys($value)[0] ?? 0) ? 'list' : 'object',
+        default => 'string'
+      };
+
+      // Track type consistency
+      if(!isset($fieldTypes[$field])){
+        $fieldTypes[$field] = ['types' => [], 'count' => 0];
+      }
+
+      $fieldTypes[$field]['types'][] = $schemaType;
+      $fieldTypes[$field]['count']++;
+    }
+  }
+
+  // Determine most common type for each field
+  $schema = ['fields' => []];
+  foreach($fieldTypes as $field => $data){
+    $typeCounts = array_count_values($data['types']);
+    arsort($typeCounts);
+    $mostCommonType = array_key_first($typeCounts);
+    $schema['fields'][$field] = $mostCommonType;
+  }
+
+  return $schema;
+}
+
+// Analyze collection and suggest schema improvements
+function analyzeCollectionSchema($collectionName){
+  $collectionPath = "cms/collections/{$collectionName}";
+  if(!is_dir($collectionPath)) return null;
+
+  // Load existing schema if present
+  $schemaPath = "{$collectionPath}/schema.json";
+  $existingSchema = file_exists($schemaPath)
+    ? json_decode(file_get_contents($schemaPath), true)
+    : null;
+
+  // Load all items in collection
+  $items = [];
+  foreach(glob("{$collectionPath}/*.json") as $file){
+    if(basename($file) === 'schema.json') continue;
+    $items[] = json_decode(file_get_contents($file), true);
+  }
+
+  if(empty($items)) return null;
+
+  // Infer schema from content
+  $inferredSchema = inferSchemaFromContent($items);
+
+  // Compare with existing schema and suggest improvements
+  $suggestions = [];
+
+  if($existingSchema){
+    // Find fields in content but not in schema
+    foreach($inferredSchema['fields'] as $field => $type){
+      if(!isset($existingSchema['fields'][$field])){
+        $suggestions[] = [
+          'type' => 'missing_field',
+          'field' => $field,
+          'inferred_type' => $type,
+          'reason' => "Found in content but not defined in schema"
+        ];
+      }
+    }
+
+    // Find fields in schema but not in content
+    foreach(($existingSchema['fields'] ?? []) as $field => $type){
+      if(!isset($inferredSchema['fields'][$field])){
+        $suggestions[] = [
+          'type' => 'unused_field',
+          'field' => $field,
+          'schema_type' => $type,
+          'reason' => "Defined in schema but not found in any items"
+        ];
+      }
+    }
+
+    // Check for type mismatches
+    foreach($inferredSchema['fields'] as $field => $inferredType){
+      if(isset($existingSchema['fields'][$field])){
+        $schemaType = $existingSchema['fields'][$field];
+        if($inferredType !== $schemaType){
+          $suggestions[] = [
+            'type' => 'type_mismatch',
+            'field' => $field,
+            'schema_type' => $schemaType,
+            'inferred_type' => $inferredType,
+            'reason' => "Schema type doesn't match actual content type"
+          ];
+        }
+      }
+    }
+  } else {
+    // No schema exists, suggest creating one
+    $suggestions[] = [
+      'type' => 'create_schema',
+      'schema' => $inferredSchema,
+      'reason' => "Collection has no schema, generated from {$inferredSchema['fields']} items"
+    ];
+  }
+
+  return [
+    'collection' => $collectionName,
+    'existing_schema' => $existingSchema,
+    'inferred_schema' => $inferredSchema,
+    'suggestions' => $suggestions
+  ];
 }
 
 // Validation layer: validate data against schema
