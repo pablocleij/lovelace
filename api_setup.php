@@ -69,8 +69,8 @@ if($action === 'save_key'){
     exit;
   }
 
-  // Validate key format
-  if($provider === 'openai' && !preg_match('/^sk-[A-Za-z0-9]{32,}/', $key)){
+  // Validate key format (more permissive - OpenAI has various formats)
+  if($provider === 'openai' && !preg_match('/^sk-[A-Za-z0-9\-_]{20,}/', $key)){
     echo json_encode([
       'success' => false,
       'error' => 'Invalid OpenAI API key format (should start with sk-)'
