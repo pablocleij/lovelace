@@ -1,0 +1,7 @@
+{
+  "name":"category",
+  "fields":{
+    "name":"string",
+    "posts":"list"
+  }
+}
