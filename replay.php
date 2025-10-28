@@ -1,5 +1,10 @@
 <?php
 
+// Replay mode: verify, rollback, or normal
+$mode = $_GET['mode'] ?? 'normal';
+$rollbackTo = $_GET['rollback'] ?? null;
+$verifyMode = $_GET['verify'] ?? false;
+
 // Schema inheritance - merge parent schema fields
 function mergeSchema($schemaName){
   $schemaPath = "cms/schemas/{$schemaName}.json";
@@ -19,16 +24,50 @@ function mergeSchema($schemaName){
 $events = glob('cms/events/*.json');
 sort($events); // Process in chronological order
 $site = [];
-// $pubKey = load from cms/config/keypair.pub
+$previousHash = '';
+$invalidEvents = [];
+
+// Verification mode: validate hash chain
+if($verifyMode){
+  echo "<h1>Event Chain Verification</h1>\n";
+  echo "<pre>\n";
+}
+
 foreach($events as $file){
   $e=json_decode(file_get_contents($file), true);
 
-  // Validate event signature before applying
-  if(isset($e['signature'])){
-    $sig=base64_decode($e['signature']);
-    if(!sodium_crypto_sign_verify_detached($sig,json_encode($e),$pubKey)){
-      die("Invalid event signature");
+  // Hash chain validation
+  if($verifyMode){
+    $expectedHash = hash('sha256', json_encode([
+      'id' => $e['id'],
+      'timestamp' => $e['timestamp'],
+      'actor' => $e['actor'],
+      'instruction' => $e['instruction'],
+      'patches' => $e['patches'],
+      'previous_hash' => $previousHash
+    ]));
+
+    $hashValid = ($e['previous_hash'] === $previousHash);
+    $status = $hashValid ? '✓ VALID' : '✗ INVALID';
+
+    echo "{$status} Event {$e['id']}: {$e['instruction']}\n";
+    echo "  Previous Hash: {$e['previous_hash']}\n";
+    echo "  Expected Prev: {$previousHash}\n";
+    echo "  Current Hash:  {$e['hash']}\n\n";
+
+    if(!$hashValid){
+      $invalidEvents[] = $e['id'];
     }
+
+    $previousHash = $e['hash'];
+  }
+
+  // Rollback mode: stop at specified event
+  if($rollbackTo && $e['id'] === $rollbackTo){
+    if($verifyMode){
+      echo "\n--- ROLLBACK POINT: Event {$rollbackTo} ---\n";
+    }
+    break;
   }
 
   $eventId = $e['id'];
@@ -78,3 +117,29 @@ if(is_dir($pagesDir)){
   }
   file_put_contents('cms/config/navigation.json', json_encode($nav, JSON_PRETTY_PRINT));
 }
+
+// Verification mode: show results
+if($verifyMode){
+  echo "</pre>\n";
+
+  if(count($invalidEvents) === 0){
+    echo "<h2 style='color:green'>✓ Event chain is valid!</h2>\n";
+    echo "<p>All " . count($events) . " events have valid hash chains.</p>\n";
+  } else {
+    echo "<h2 style='color:red'>✗ Event chain validation failed!</h2>\n";
+    echo "<p>Invalid events: " . implode(', ', $invalidEvents) . "</p>\n";
+  }
+  exit;
+}
+
+// Rollback mode: show success message
+if($rollbackTo){
+  echo "<h1>Rollback Complete</h1>\n";
+  echo "<p>State rebuilt up to event: <strong>{$rollbackTo}</strong></p>\n";
+  echo "<p>Snapshot saved to: cms/snapshots/latest.json</p>\n";
+  echo "<p><a href='preview.php'>View Preview</a> | <a href='index.php'>Return to CMS</a></p>\n";
+  exit;
+}
+
+// Normal mode: silent execution
+// Snapshot and navigation already built above

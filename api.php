@@ -187,13 +187,35 @@ function validateAndGenerateForm($schemaName, $data){
 }
 
 function writeEvent($event){
-  $prevHash = ''; // load previous hash if exists
-  $event['previous_hash']=$prevHash;
-  $event['hash']=hash('sha256', json_encode($event));
+  // Load previous hash from last event
+  $events = glob('cms/events/*.json');
+  rsort($events); // Get latest event first
+  $prevHash = '';
+
+  if(count($events) > 0){
+    $lastEvent = json_decode(file_get_contents($events[0]), true);
+    $prevHash = $lastEvent['hash'] ?? '';
+  }
+
+  $event['previous_hash'] = $prevHash;
+
+  // Calculate hash from deterministic event data
+  $hashData = [
+    'id' => $event['id'],
+    'timestamp' => $event['timestamp'],
+    'actor' => $event['actor'],
+    'instruction' => $event['instruction'],
+    'patches' => $event['patches'],
+    'previous_hash' => $prevHash
+  ];
+  $event['hash'] = hash('sha256', json_encode($hashData));
+
+  // Sign the event (using temporary key for now)
   $key = sodium_crypto_sign_keypair();
-  $event['signature']=base64_encode(sodium_crypto_sign_detached(json_encode($event), $key));
-  $id = str_pad(count(glob('cms/events/*.json'))+1,7,'0',STR_PAD_LEFT);
-  file_put_contents("cms/events/$id.json", json_encode($event,JSON_PRETTY_PRINT));
+  $event['signature'] = base64_encode(sodium_crypto_sign_detached(json_encode($event), $key));
+
+  $id = $event['id'];
+  file_put_contents("cms/events/$id.json", json_encode($event, JSON_PRETTY_PRINT));
 
   // Event audit log
   file_put_contents('cms/logs/audit.log', date('c').' '.$event['instruction']."\n", FILE_APPEND);
