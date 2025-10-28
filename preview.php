@@ -66,6 +66,9 @@ $metaCanonical = $pageMeta['canonical'] ?? '';
   <?php if($metaOgImage): ?>
   <meta name="twitter:image" content="<?= htmlspecialchars($metaOgImage) ?>">
   <?php endif; ?>
+
+  <!-- Live reload script for development -->
+  <script src="js/preview-reload.js"></script>
   <style>
     :root {
       --color-primary: <?= $theme['colors']['primary'] ?>;

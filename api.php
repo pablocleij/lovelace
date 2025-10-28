@@ -441,6 +441,9 @@ if(isset($response['form']) && $response['form'] !== null){
 
 writeEvent($response['event']);
 
+// Trigger replay to rebuild snapshots after event creation
+exec('php replay.php > /dev/null 2>&1 &');  // Run in background
+
 // Dynamic navigation: automatically update based on pages collection
 $pagesDir = 'cms/collections/pages';
 if(is_dir($pagesDir)){
