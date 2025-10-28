@@ -160,6 +160,26 @@ async function streamAIResponse(msg){
       body: JSON.stringify({action: 'chat', message: msg})
     }).then(r => r.json());
 
+    // Parse and clean the response
+    if(structuredRes && structuredRes.message){
+      // If message is wrapped in JSON markdown, extract it
+      let cleanMessage = fullMessage;
+
+      // Try to extract JSON from markdown code blocks
+      const jsonMatch = fullMessage.match(/```json\s*([\s\S]*?)\s*```/);
+      if(jsonMatch){
+        try {
+          const parsedJson = JSON.parse(jsonMatch[1]);
+          cleanMessage = parsedJson.message || fullMessage;
+        } catch(e){
+          console.log('Could not parse embedded JSON, using raw message');
+        }
+      }
+
+      // Update the display with clean message
+      contentDiv.textContent = cleanMessage;
+    }
+
     return structuredRes;
 
   } catch(error){

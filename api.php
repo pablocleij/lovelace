@@ -85,6 +85,7 @@ function buildContext(){
   $context .= "  \"scored_suggestions\": [],\n";
   $context .= "  \"section_suggestions\": []\n";
   $context .= "}\n\n";
+  $context .= "CRITICAL: Return ONLY the raw JSON object. Do NOT wrap it in markdown code blocks (```json). Do NOT add any text before or after the JSON. Just pure JSON.\n";
   $context .= "NEVER return plain text. ALWAYS return valid JSON matching this structure.\n\n";
 
   // Proactive AI behavior instructions
