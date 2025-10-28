@@ -10,12 +10,62 @@ if(!in_array($currentLang, $langConfig['supported'])){
 
 // Load theme configuration
 $theme = json_decode(file_get_contents('cms/config/theme.json'), true);
+
+// Load snapshot to extract metadata
+$snap = json_decode(file_get_contents('cms/snapshots/latest.json'), true);
+$pageMeta = null;
+
+// Try to extract metadata from the first page with metadata
+foreach($snap as $item){
+  if(isset($item['meta'])){
+    $pageMeta = $item['meta'];
+    break;
+  }
+}
+
+// Default metadata
+$metaTitle = $pageMeta['title'] ?? 'lovelace CMS';
+$metaDescription = $pageMeta['description'] ?? 'A conversational AI-powered CMS';
+$metaOgImage = $pageMeta['og_image'] ?? '';
+$metaOgType = $pageMeta['og_type'] ?? 'website';
+$metaKeywords = $pageMeta['keywords'] ?? '';
+$metaAuthor = $pageMeta['author'] ?? '';
+$metaCanonical = $pageMeta['canonical'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>">
 <head>
   <meta charset="UTF-8">
-  <title>Preview - <?= $langConfig['labels'][$currentLang] ?? $currentLang ?></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= htmlspecialchars($metaTitle) ?></title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="<?= htmlspecialchars($metaDescription) ?>">
+  <?php if($metaKeywords): ?>
+  <meta name="keywords" content="<?= htmlspecialchars($metaKeywords) ?>">
+  <?php endif; ?>
+  <?php if($metaAuthor): ?>
+  <meta name="author" content="<?= htmlspecialchars($metaAuthor) ?>">
+  <?php endif; ?>
+  <?php if($metaCanonical): ?>
+  <link rel="canonical" href="<?= htmlspecialchars($metaCanonical) ?>">
+  <?php endif; ?>
+
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:title" content="<?= htmlspecialchars($metaTitle) ?>">
+  <meta property="og:description" content="<?= htmlspecialchars($metaDescription) ?>">
+  <meta property="og:type" content="<?= htmlspecialchars($metaOgType) ?>">
+  <?php if($metaOgImage): ?>
+  <meta property="og:image" content="<?= htmlspecialchars($metaOgImage) ?>">
+  <?php endif; ?>
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<?= htmlspecialchars($metaTitle) ?>">
+  <meta name="twitter:description" content="<?= htmlspecialchars($metaDescription) ?>">
+  <?php if($metaOgImage): ?>
+  <meta name="twitter:image" content="<?= htmlspecialchars($metaOgImage) ?>">
+  <?php endif; ?>
   <style>
     :root {
       --color-primary: <?= $theme['colors']['primary'] ?>;
@@ -196,7 +246,7 @@ function renderTemplate($type, $data){
   return $html;
 }
 
-$snap=json_decode(file_get_contents('cms/snapshots/latest.json'),true);
+// Snapshot already loaded at the top for metadata extraction
 foreach($snap as $item){
   if(isset($item['sections'])){
     // Multi-section page with templates

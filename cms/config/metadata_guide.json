@@ -1,0 +1,77 @@
+{
+  "description": "Guide for using rich metadata in lovelace CMS",
+  "supported_meta_fields": {
+    "title": "Page title for SEO (shown in browser tab and search results)",
+    "description": "Page description for SEO (shown in search results)",
+    "og_image": "Open Graph image URL for social media sharing",
+    "og_type": "Open Graph type (website, article, product, etc.)",
+    "keywords": "Comma-separated keywords for SEO",
+    "author": "Content author name",
+    "canonical": "Canonical URL to prevent duplicate content"
+  },
+  "example_page_with_metadata": {
+    "title": "Home",
+    "sections": [
+      {
+        "type": "hero",
+        "title": "Welcome",
+        "subtitle": "Launch fast"
+      }
+    ],
+    "meta": {
+      "title": "lovelace - AI-Powered CMS",
+      "description": "A file-based, event-sourced CMS managed entirely through conversational AI.",
+      "og_image": "/assets/images/og-image.png",
+      "og_type": "website",
+      "keywords": "CMS, AI, conversational, event-sourcing",
+      "author": "lovelace"
+    }
+  },
+  "rendered_meta_tags": {
+    "basic_seo": [
+      "<title>lovelace - AI-Powered CMS</title>",
+      "<meta name=\"description\" content=\"A file-based, event-sourced CMS...\">",
+      "<meta name=\"keywords\" content=\"CMS, AI, conversational, event-sourcing\">",
+      "<meta name=\"author\" content=\"lovelace\">"
+    ],
+    "open_graph": [
+      "<meta property=\"og:title\" content=\"lovelace - AI-Powered CMS\">",
+      "<meta property=\"og:description\" content=\"...\">",
+      "<meta property=\"og:type\" content=\"website\">",
+      "<meta property=\"og:image\" content=\"/assets/images/og-image.png\">"
+    ],
+    "twitter_card": [
+      "<meta name=\"twitter:card\" content=\"summary_large_image\">",
+      "<meta name=\"twitter:title\" content=\"lovelace - AI-Powered CMS\">",
+      "<meta name=\"twitter:description\" content=\"...\">",
+      "<meta name=\"twitter:image\" content=\"/assets/images/og-image.png\">"
+    ]
+  },
+  "ai_workflow": {
+    "user_request": "Add SEO metadata to the homepage",
+    "ai_response": "I'll add comprehensive SEO metadata including title, description, Open Graph tags, and Twitter Card tags.",
+    "ai_action": [
+      "1. AI reads current page data",
+      "2. AI adds 'meta' object with appropriate fields",
+      "3. AI suggests og_image upload if not present",
+      "4. AI creates event to update page with metadata",
+      "5. Preview engine automatically renders meta tags in <head>"
+    ]
+  },
+  "benefits": [
+    "Better search engine visibility",
+    "Rich social media previews (Twitter, Facebook, LinkedIn)",
+    "Improved click-through rates from search results",
+    "Professional appearance when sharing links",
+    "Proper attribution and authorship",
+    "Duplicate content prevention with canonical URLs"
+  ],
+  "best_practices": [
+    "Keep titles under 60 characters for optimal display in search results",
+    "Keep descriptions between 150-160 characters",
+    "Use high-quality og_image (1200x630px recommended)",
+    "Make descriptions compelling and action-oriented",
+    "Include relevant keywords naturally",
+    "Use unique metadata for each page"
+  ]
+}

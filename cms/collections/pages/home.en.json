@@ -4,5 +4,13 @@
     {"type":"hero","title":"Welcome","subtitle":"Launch fast"},
     {"type":"features","items":[{"title":"Fast","desc":"Instant setup"},{"title":"AI-driven","desc":"Proactive CMS"}]},
     {"type":"recent_posts","collection":"posts","limit":3}
-  ]
+  ],
+  "meta":{
+    "title":"lovelace - AI-Powered CMS",
+    "description":"A file-based, event-sourced CMS managed entirely through conversational AI. No database, no admin panel—just natural language.",
+    "og_image":"/assets/images/og-image.png",
+    "og_type":"website",
+    "keywords":"CMS, AI, conversational, event-sourcing, file-based",
+    "author":"lovelace"
+  }
 }
