@@ -37,6 +37,11 @@ foreach($events as $file){
     if($patch['op']=='create_file'){
       file_put_contents('cms/'.$patch['target'], json_encode($patch['value'], JSON_PRETTY_PRINT));
     }
+    if($patch['op']=='update_theme'){
+      $theme = json_decode(file_get_contents('cms/config/theme.json'), true);
+      $theme = array_merge_recursive($theme, $patch['value']);
+      file_put_contents('cms/config/theme.json', json_encode($theme, JSON_PRETTY_PRINT));
+    }
   }
 }
 

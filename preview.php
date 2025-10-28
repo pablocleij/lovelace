@@ -1,4 +1,25 @@
 <?php
+// Load theme configuration
+$theme = json_decode(file_get_contents('cms/config/theme.json'), true);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Preview</title>
+  <style>
+    :root {
+      --color-primary: <?= $theme['colors']['primary'] ?>;
+      --color-secondary: <?= $theme['colors']['secondary'] ?>;
+      --font-heading: <?= $theme['fonts']['heading'] ?>, sans-serif;
+      --font-body: <?= $theme['fonts']['body'] ?>, sans-serif;
+    }
+    body { font-family: var(--font-body); }
+    h1, h2, h3 { font-family: var(--font-heading); color: var(--color-primary); }
+  </style>
+</head>
+<body>
+<?php
 
 // Simple template renderer
 function renderTemplate($type, $data){
@@ -50,3 +71,6 @@ foreach($snap as $item){
     echo "<section><h1>{$item['title']}</h1></section>";
   }
 }
+?>
+</body>
+</html>
