@@ -10,6 +10,20 @@ function decryptKey($encryptedKey){
   return openssl_decrypt($parts[1], 'AES-256-CBC', ENCRYPTION_KEY, 0, $parts[0]);
 }
 
+// Create default api_key.json if it doesn't exist
+if(!file_exists('cms/config/api_key.json')){
+  if(file_exists('cms/config/api_key.example.json')){
+    copy('cms/config/api_key.example.json', 'cms/config/api_key.json');
+  } else {
+    file_put_contents('cms/config/api_key.json', json_encode([
+      'provider' => 'openai',
+      'key' => 'YOUR_KEY_HERE',
+      'model' => 'gpt-4o',
+      'encrypted' => false
+    ], JSON_PRETTY_PRINT));
+  }
+}
+
 $apiConfig = json_decode(file_get_contents('cms/config/api_key.json'), true);
 $apiKey = $apiConfig['key'];
 $isEncrypted = $apiConfig['encrypted'] ?? false;

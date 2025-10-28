@@ -1,0 +1,7 @@
+{
+  "provider": "openai",
+  "key": "YOUR_KEY_HERE",
+  "model": "gpt-4o",
+  "encrypted": false,
+  "last_updated": ""
+}
