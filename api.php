@@ -50,6 +50,35 @@ function buildContext(){
   return $context;
 }
 
+// Auto-generate forms for missing required schema fields
+function validateAndGenerateForm($schemaName, $data){
+  $schemaPath = "cms/schemas/{$schemaName}.json";
+  if(!file_exists($schemaPath)) return null;
+
+  $schema = json_decode(file_get_contents($schemaPath), true);
+
+  // Handle schema inheritance
+  if(isset($schema['extends'])){
+    $parentPath = "cms/schemas/{$schema['extends']}.json";
+    if(file_exists($parentPath)){
+      $parent = json_decode(file_get_contents($parentPath), true);
+      $schema['fields'] = array_merge($parent['fields'] ?? [], $schema['fields']);
+    }
+  }
+
+  $form = ['fields'=>[]];
+
+  // Check for missing fields
+  foreach($schema['fields'] as $f=>$type){
+    if(!isset($data[$f])){
+      $form['fields'][]=["name"=>$f,"label"=>$f,"type"=>$type];
+    }
+  }
+
+  // Return form only if there are missing fields
+  return count($form['fields']) > 0 ? $form : null;
+}
+
 function writeEvent($event){
   $prevHash = ''; // load previous hash if exists
   $event['previous_hash']=$prevHash;
@@ -86,6 +115,14 @@ foreach($response['event']['patches'] ?? [] as $patch){
   if(in_array($patch['op'], $policy['require_confirmation_for'])){
     // Requires user confirmation
     $response['requires_confirmation'] = true;
+  }
+
+  // Auto-generate forms for collection items with missing schema fields
+  if($patch['op']=='create_file' && isset($patch['schema'])){
+    $generatedForm = validateAndGenerateForm($patch['schema'], $patch['value']);
+    if($generatedForm){
+      $response['form'] = array_merge($response['form'] ?? [], $generatedForm);
+    }
   }
 }
 
