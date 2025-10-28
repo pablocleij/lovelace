@@ -93,6 +93,26 @@ function buildContext(){
   $context .= "2. Update user_profile.json with site_name field\n";
   $context .= "Always use the user's name in future responses after it's been set.\n\n";
 
+  // Load starter content templates
+  $starterContent = file_exists('cms/config/starter_content.json')
+    ? json_decode(file_get_contents('cms/config/starter_content.json'), true)
+    : null;
+
+  if($starterContent){
+    $context .= "STARTER CONTENT TEMPLATES:\n";
+    $context .= "When user wants to quickly set up their site, offer these templates:\n";
+    foreach(($starterContent['templates'] ?? []) as $key => $template){
+      $context .= "- {$template['name']}: {$template['description']}\n";
+    }
+    $context .= "\nTo use a template:\n";
+    $context .= "1. Create all required collections with schemas\n";
+    $context .= "2. Create pages and items from template data\n";
+    $context .= "3. Confirm with user and offer customization options\n\n";
+
+    $context .= "Example: User says 'Set up a basic website'\n";
+    $context .= "Response: Create home, about, contact pages with appropriate sections\n\n";
+  }
+
   $context .= "SUGGESTION EXAMPLES:\n";
   $context .= "- After creating homepage: Suggest 'Add an about page' or 'Create a blog section'\n";
   $context .= "- After adding blog: Suggest 'Create your first blog post' or 'Add categories'\n";

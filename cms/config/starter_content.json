@@ -1,0 +1,195 @@
+{
+  "description": "Starter content templates for quick site setup",
+  "templates": {
+    "basic_website": {
+      "name": "Basic Website",
+      "description": "Simple business website with home, about, and contact pages",
+      "collections": ["pages"],
+      "pages": [
+        {
+          "slug": "home",
+          "title": "Welcome to Our Website",
+          "sections": [
+            {
+              "type": "hero",
+              "headline": "Build Something Amazing",
+              "subheadline": "We help businesses grow with cutting-edge solutions",
+              "cta_text": "Get Started",
+              "cta_link": "/contact"
+            },
+            {
+              "type": "features",
+              "title": "What We Offer",
+              "items": [
+                {"icon": "⚡", "title": "Fast", "description": "Lightning-fast performance"},
+                {"icon": "🔒", "title": "Secure", "description": "Enterprise-grade security"},
+                {"icon": "📱", "title": "Responsive", "description": "Works on all devices"}
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "title": "About Us",
+          "sections": [
+            {
+              "type": "text",
+              "content": "We are a team of passionate professionals dedicated to delivering excellence."
+            }
+          ]
+        },
+        {
+          "slug": "contact",
+          "title": "Contact Us",
+          "sections": [
+            {
+              "type": "contact_form",
+              "fields": ["name", "email", "message"]
+            }
+          ]
+        }
+      ]
+    },
+    "blog_website": {
+      "name": "Blog Website",
+      "description": "Content-focused blog with categories and posts",
+      "collections": ["pages", "posts", "categories"],
+      "pages": [
+        {
+          "slug": "home",
+          "title": "Blog Home",
+          "sections": [
+            {
+              "type": "hero",
+              "headline": "Welcome to Our Blog",
+              "subheadline": "Insights, stories, and ideas"
+            },
+            {
+              "type": "recent_posts",
+              "title": "Latest Articles",
+              "count": 6
+            }
+          ]
+        },
+        {
+          "slug": "blog",
+          "title": "All Posts",
+          "sections": [
+            {
+              "type": "post_list",
+              "filter_by_category": false
+            }
+          ]
+        }
+      ],
+      "posts": [
+        {
+          "title": "Getting Started",
+          "content": "Welcome to our blog! This is your first post.",
+          "category": "General",
+          "date": "2024-01-01",
+          "author": "Admin"
+        },
+        {
+          "title": "Tips and Tricks",
+          "content": "Here are some helpful tips to get the most out of our platform.",
+          "category": "Tutorials",
+          "date": "2024-01-02",
+          "author": "Admin"
+        }
+      ],
+      "categories": [
+        {"name": "General", "posts": []},
+        {"name": "Tutorials", "posts": []},
+        {"name": "News", "posts": []}
+      ]
+    },
+    "portfolio_website": {
+      "name": "Portfolio Website",
+      "description": "Showcase your work with project galleries",
+      "collections": ["pages", "portfolio"],
+      "pages": [
+        {
+          "slug": "home",
+          "title": "Portfolio",
+          "sections": [
+            {
+              "type": "hero",
+              "headline": "Creative Designer & Developer",
+              "subheadline": "Crafting beautiful digital experiences"
+            },
+            {
+              "type": "portfolio_grid",
+              "title": "Featured Work",
+              "columns": 3
+            }
+          ]
+        }
+      ],
+      "portfolio": [
+        {
+          "title": "Project Alpha",
+          "description": "A modern web application",
+          "client": "Tech Co",
+          "image": "/assets/portfolio/project1.jpg",
+          "tags": ["Web Design", "UI/UX"],
+          "date": "2024-01-01"
+        },
+        {
+          "title": "Project Beta",
+          "description": "Mobile app redesign",
+          "client": "Startup Inc",
+          "image": "/assets/portfolio/project2.jpg",
+          "tags": ["Mobile", "Branding"],
+          "date": "2024-02-01"
+        }
+      ]
+    },
+    "landing_page": {
+      "name": "Landing Page",
+      "description": "Single-page marketing site with lead capture",
+      "collections": ["pages"],
+      "pages": [
+        {
+          "slug": "home",
+          "title": "Product Landing Page",
+          "sections": [
+            {
+              "type": "hero",
+              "headline": "Transform Your Business Today",
+              "subheadline": "The all-in-one solution you've been waiting for",
+              "cta_text": "Start Free Trial",
+              "cta_link": "#signup"
+            },
+            {
+              "type": "features",
+              "title": "Why Choose Us",
+              "items": [
+                {"icon": "⚡", "title": "Lightning Fast", "description": "10x faster than competitors"},
+                {"icon": "💰", "title": "Affordable", "description": "Plans starting at $9/month"},
+                {"icon": "🎯", "title": "Easy to Use", "description": "No technical skills required"}
+              ]
+            },
+            {
+              "type": "testimonials",
+              "title": "What Our Customers Say"
+            },
+            {
+              "type": "pricing",
+              "title": "Simple Pricing",
+              "plans": [
+                {"name": "Starter", "price": "$9", "features": ["Feature 1", "Feature 2"]},
+                {"name": "Pro", "price": "$29", "features": ["Everything in Starter", "Feature 3", "Feature 4"]}
+              ]
+            },
+            {
+              "type": "cta",
+              "headline": "Ready to Get Started?",
+              "button_text": "Sign Up Now"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
