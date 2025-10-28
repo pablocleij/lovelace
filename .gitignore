@@ -2,3 +2,5 @@
 PRD.md
 .github-token
 NEXT_10_PATCHES.md
+cms/config/api_key.json
+.env

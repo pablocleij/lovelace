@@ -1,7 +1,31 @@
 <?php
 header('Content-Type: application/json');
+
+// Encryption key (must match api_setup.php)
+define('ENCRYPTION_KEY', 'lovelace_cms_key_2024'); // TODO: Move to .env
+
+function decryptKey($encryptedKey){
+  $parts = explode('::', base64_decode($encryptedKey));
+  if(count($parts) !== 2) return null;
+  return openssl_decrypt($parts[1], 'AES-256-CBC', ENCRYPTION_KEY, 0, $parts[0]);
+}
+
 $apiConfig = json_decode(file_get_contents('cms/config/api_key.json'), true);
 $apiKey = $apiConfig['key'];
+$isEncrypted = $apiConfig['encrypted'] ?? false;
+
+// Decrypt key if encrypted
+if($isEncrypted){
+  $apiKey = decryptKey($apiKey);
+  if(!$apiKey){
+    echo json_encode([
+      'error' => 'Failed to decrypt API key',
+      'message' => 'Please reconfigure your API key'
+    ]);
+    exit;
+  }
+}
+
 $provider = $apiConfig['provider'] ?? 'openai';
 $model = $apiConfig['model'] ?? 'gpt-4o';
 $policy = json_decode(file_get_contents('cms/config/policy.json'), true);
