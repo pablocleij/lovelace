@@ -22,4 +22,9 @@ foreach($events as $file){
     }
   }
 }
-file_put_contents('cms/snapshots/latest.json', json_encode($site,JSON_PRETTY_PRINT));
+
+// Snapshot builder
+$collections=glob('cms/collections/*/*.json');
+$snap=[];
+foreach($collections as $file){ $snap[] = json_decode(file_get_contents($file),true); }
+file_put_contents('cms/snapshots/latest.json',json_encode($snap,JSON_PRETTY_PRINT));

@@ -15,5 +15,13 @@ input.addEventListener('keydown', async (e) => {
     }).then(r=>r.json());
     const botDiv = document.createElement('div'); botDiv.textContent='AI: '+res.message;
     container.appendChild(botDiv);
+
+    if(res.form){
+      const f = document.createElement('form');
+      res.form.fields.forEach(fld=>{
+        const input=document.createElement('input'); input.placeholder=fld.label; f.appendChild(input);
+      });
+      container.appendChild(f);
+    }
   }
 });
