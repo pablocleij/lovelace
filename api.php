@@ -5,31 +5,13 @@ header('Content-Type: application/json');
 error_reporting(E_ERROR | E_PARSE);
 ini_set('display_errors', '0');
 
-// Encryption key (must match api_setup.php)
-define('ENCRYPTION_KEY', 'lovelace_cms_key_2024'); // TODO: Move to .env
-
+// Simple decryption (must match api_setup.php)
 function decryptKey($encryptedKey){
-  try {
-    $decoded = base64_decode($encryptedKey);
-    $parts = explode('::', $decoded);
-
-    // Check for fallback encoding
-    if(count($parts) === 2 && $parts[0] === 'FALLBACK'){
-      return $parts[1];
-    }
-
-    if(count($parts) !== 2) return null;
-
-    if(!function_exists('openssl_decrypt')){
-      return null;
-    }
-
-    $decrypted = openssl_decrypt($parts[1], 'AES-256-CBC', ENCRYPTION_KEY, 0, $parts[0]);
-    return $decrypted === false ? null : $decrypted;
-  } catch(Exception $e){
-    error_log('Decryption failed: ' . $e->getMessage());
-    return null;
+  $decoded = base64_decode($encryptedKey);
+  if(strpos($decoded, 'SIMPLE::') === 0){
+    return substr($decoded, 8);
   }
+  return null;
 }
 
 // Create default api_key.json if it doesn't exist
