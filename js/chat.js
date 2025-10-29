@@ -171,17 +171,26 @@ async function streamAIResponse(msg){
 
     // Parse and clean the response
     if(structuredRes && structuredRes.message){
-      // If message is wrapped in JSON markdown, extract it
-      let cleanMessage = fullMessage;
+      let cleanMessage = structuredRes.message;
+
+      // If the streamed content is JSON, parse it and extract the message
+      if(fullMessage.trim().startsWith('{')){
+        try {
+          const parsedJson = JSON.parse(fullMessage);
+          cleanMessage = parsedJson.message || structuredRes.message;
+        } catch(e){
+          console.log('Could not parse streamed JSON, using structured response');
+        }
+      }
 
       // Try to extract JSON from markdown code blocks
       const jsonMatch = fullMessage.match(/```json\s*([\s\S]*?)\s*```/);
       if(jsonMatch){
         try {
           const parsedJson = JSON.parse(jsonMatch[1]);
-          cleanMessage = parsedJson.message || fullMessage;
+          cleanMessage = parsedJson.message || cleanMessage;
         } catch(e){
-          console.log('Could not parse embedded JSON, using raw message');
+          console.log('Could not parse embedded JSON, using existing message');
         }
       }
 
@@ -388,15 +397,16 @@ input.addEventListener('keydown', async (e) => {
         suggestionItem.className = 'suggestion-card';
 
         const scorePercent = Math.round(suggestion.score * 100);
+        const suggestionText = suggestion.suggestion || suggestion.message || 'Unknown suggestion';
         suggestionItem.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="font-medium text-gray-900">${index + 1}. ${suggestion.message}</span>
+            <span class="font-medium text-gray-900">${index + 1}. ${suggestionText}</span>
             <span class="text-sm text-gray-500 ml-4">${scorePercent}%</span>
           </div>
         `;
 
         suggestionItem.addEventListener('click', () => {
-          input.value = suggestion.message;
+          input.value = suggestionText;
           input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
         });
 

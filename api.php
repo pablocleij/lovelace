@@ -866,8 +866,16 @@ if($isStreaming){
   // Call LLM and get response
   $aiMessage = callLLM($provider, $apiKey, $model, $contextPrompt, $data['message']);
 
+  // Parse the response to extract just the message for streaming
+  $parsedResponse = json_decode($aiMessage, true);
+  $messageToStream = $aiMessage; // Default to full response
+
+  if($parsedResponse && isset($parsedResponse['message'])){
+    $messageToStream = $parsedResponse['message'];
+  }
+
   // Send response in chunks
-  $chunks = str_split($aiMessage, 50);  // Split into 50-char chunks for streaming effect
+  $chunks = str_split($messageToStream, 50);  // Split into 50-char chunks for streaming effect
   foreach($chunks as $chunk){
     echo "data: " . json_encode(['type' => 'chunk', 'content' => $chunk]) . "\n\n";
     flush();

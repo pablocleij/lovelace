@@ -1,0 +1,11 @@
+{
+    "title": "Home",
+    "sections": [
+        {
+            "type": "hero",
+            "content": "Welcome to Our Website",
+            "description": "Discover amazing content and get inspired!",
+            "image": "path\/to\/hero-image.jpg"
+        }
+    ]
+}
