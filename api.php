@@ -860,12 +860,22 @@ $contextPrompt = buildContext();
 
 // Streaming response support
 if($isStreaming){
+  // Disable all output buffering for true streaming
+  while(ob_get_level()) ob_end_clean();
+
   header('Content-Type: text/event-stream');
   header('Cache-Control: no-cache');
   header('X-Accel-Buffering: no'); // Disable nginx buffering
 
+  if(function_exists('apache_setenv')){
+    apache_setenv('no-gzip', '1');
+  }
+  ini_set('output_buffering', 'off');
+  ini_set('zlib.output_compression', false);
+
   // For streaming, we'll send the message first, then the structured response
   echo "data: " . json_encode(['type' => 'start']) . "\n\n";
+  if(ob_get_level()) ob_flush();
   flush();
 
   // Call LLM and get response
@@ -879,15 +889,13 @@ if($isStreaming){
     $messageToStream = $parsedResponse['message'];
   }
 
-  // Send response in chunks
-  $chunks = str_split($messageToStream, 50);  // Split into 50-char chunks for streaming effect
-  foreach($chunks as $chunk){
-    echo "data: " . json_encode(['type' => 'chunk', 'content' => $chunk]) . "\n\n";
-    flush();
-    usleep(30000); // 30ms delay for visual streaming effect
-  }
+  // Send the complete message immediately (not real streaming - we get full response first)
+  echo "data: " . json_encode(['type' => 'chunk', 'content' => $messageToStream]) . "\n\n";
+  if(ob_get_level()) ob_flush();
+  flush();
 
   echo "data: " . json_encode(['type' => 'end']) . "\n\n";
+  if(ob_get_level()) ob_flush();
   flush();
   exit;
 }

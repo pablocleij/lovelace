@@ -1,0 +1,46 @@
+{
+    "event_id": "0000007",
+    "timestamp": "2025-10-29T07:29:12+00:00",
+    "instruction": "Add more testimonials",
+    "form": {
+        "fields": [
+            {
+                "name": "name",
+                "type": "string",
+                "label": "Name",
+                "placeholder": "Enter name"
+            },
+            {
+                "name": "company",
+                "type": "string",
+                "label": "Company",
+                "placeholder": "Enter company"
+            },
+            {
+                "name": "role",
+                "type": "string",
+                "label": "Role",
+                "placeholder": "Enter role"
+            },
+            {
+                "name": "quote",
+                "type": "string",
+                "label": "Quote",
+                "placeholder": "Enter testimonial quote"
+            },
+            {
+                "name": "rating",
+                "type": "number",
+                "label": "Rating",
+                "placeholder": "Enter rating"
+            },
+            {
+                "name": "photo",
+                "type": "image",
+                "label": "Photo",
+                "placeholder": "Choose photo"
+            }
+        ]
+    },
+    "submitted": false
+}

@@ -4,6 +4,18 @@
         "slug": "0001"
     },
     {
+        "title": "Homepage",
+        "slug": "0002"
+    },
+    {
+        "title": "Homepage",
+        "slug": "0003"
+    },
+    {
+        "title": "Homepage",
+        "slug": "0004"
+    },
+    {
         "title": "About",
         "slug": "about"
     },
@@ -12,7 +24,7 @@
         "slug": "home.en"
     },
     {
-        "title": "Home",
+        "title": "Welcome to Our Site",
         "slug": "home"
     },
     {

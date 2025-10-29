@@ -1,0 +1,35 @@
+{
+    "id": "0000007",
+    "timestamp": "2023-10-01T12:00:00Z",
+    "actor": "ai-agent",
+    "instruction": "Add more testimonials",
+    "patches": [
+        {
+            "op": "create_collection_item",
+            "target": "testimonials",
+            "value": {
+                "name": "John Doe",
+                "company": "Doe Enterprises",
+                "role": "CEO",
+                "quote": "This service was exceptional and exceeded our expectations.",
+                "rating": 5,
+                "photo": "john_doe.jpg"
+            }
+        },
+        {
+            "op": "create_collection_item",
+            "target": "testimonials",
+            "value": {
+                "name": "Jane Smith",
+                "company": "Smith & Co",
+                "role": "Marketing Director",
+                "quote": "A truly outstanding experience from start to finish!",
+                "rating": 5,
+                "photo": "jane_smith.jpg"
+            }
+        }
+    ],
+    "previous_hash": "0270e758d4a3b865ac6c120571bc75c665d33475a7f2c133add92327635b17a1",
+    "hash": "dd688b6de0e1527d5089da35d385737886df09b9632eb7835fec87bae713da98",
+    "signature": "2b2de6a53408a0a9b8d55077c9271ee713f56539ef6052df873c63e7232734c5"
+}
