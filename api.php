@@ -934,8 +934,9 @@ if(!isset($response['event']['patches'])){
 
 // AI checks policy before applying patch (unless already confirmed)
 if(!$isConfirmed){
+  $requireConfirmation = $policy['require_confirmation_for'] ?? [];
   foreach($response['event']['patches'] ?? [] as $patch){
-    if(in_array($patch['op'], $policy['require_confirmation_for'])){
+    if(in_array($patch['op'], $requireConfirmation)){
       // Requires user confirmation
       $response['requires_confirmation'] = true;
       $response['pending_event'] = $response['event'];
@@ -1019,14 +1020,14 @@ if(is_dir($pagesDir)){
   file_put_contents('cms/config/navigation.json', json_encode($nav, JSON_PRETTY_PRINT));
 }
 
-if(in_array('add_to_navigation',$response['suggestions'])){
+if(isset($response['suggestions']) && in_array('add_to_navigation',$response['suggestions'])){
   $nav=json_decode(file_get_contents('cms/config/navigation.json'),true);
   $nav[]=$response['page'];
   file_put_contents('cms/config/navigation.json',json_encode($nav,JSON_PRETTY_PRINT));
 }
 
 // Proactive AI suggestions
-if($policy['suggest_improvements']){
+if(isset($policy['suggest_improvements']) && $policy['suggest_improvements']){
   $suggest=['Add SEO meta','Group navigation','Add footer'];
   $response['suggestions'] = array_merge($response['suggestions'] ?? [], $suggest);
 }
