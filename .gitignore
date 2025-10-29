@@ -4,3 +4,5 @@ PRD.md
 NEXT_10_PATCHES.md
 cms/config/api_key.json
 .env
+/vendor/
+composer.lock

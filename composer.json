@@ -1,0 +1,16 @@
+{
+    "name": "lovelace/cms",
+    "description": "AI-powered file-based CMS",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "swisnl/agents-sdk": "^0.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lovelace\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
