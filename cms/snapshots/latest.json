@@ -42,6 +42,12 @@
         ]
     },
     {
+        "title": "Homepage",
+        "sections": [
+            "hero"
+        ]
+    },
+    {
         "title": "About",
         "sections": [
             {
@@ -200,5 +206,35 @@
         "quote": "A truly outstanding experience from start to finish!",
         "rating": 5,
         "photo": "jane_smith.jpg"
+    },
+    {
+        "name": "Jane Doe",
+        "company": "TechCorp",
+        "quote": "Exceptional service and support!",
+        "rating": 5
+    },
+    {
+        "name": "John Doe",
+        "company": "Doe Enterprises",
+        "role": "CEO",
+        "quote": "This service was exceptional and exceeded our expectations.",
+        "rating": 5,
+        "photo": "john_doe.jpg"
+    },
+    {
+        "name": "Jane Smith",
+        "company": "Smith & Co",
+        "role": "Marketing Director",
+        "quote": "A truly outstanding experience from start to finish!",
+        "rating": 5,
+        "photo": "jane_smith.jpg"
+    },
+    {
+        "name": "John",
+        "company": "Finded",
+        "role": "Developer",
+        "quote": "Best CMS of all time",
+        "rating": 5,
+        "photo": "[object File]"
     }
 ]

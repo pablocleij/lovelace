@@ -703,6 +703,120 @@ function writeEvent($event){
   file_put_contents('cms/logs/audit.log', date('c').' '.$event['instruction']."\n", FILE_APPEND);
 }
 
+// Streaming API functions (real-time token streaming)
+function streamOpenAI($apiKey, $model, $systemPrompt, $userMessage){
+  $payload = [
+    "model" => $model,
+    "messages" => [
+      ["role" => "system", "content" => $systemPrompt],
+      ["role" => "user", "content" => $userMessage]
+    ],
+    "stream" => true
+  ];
+
+  if(function_exists('curl_init')){
+    $ch = curl_init("https://api.openai.com/v1/chat/completions");
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $apiKey", "Content-Type: application/json"]);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) {
+      // Parse SSE format: "data: {...}\n\n"
+      $lines = explode("\n", $data);
+      foreach($lines as $line){
+        if(strpos($line, 'data: ') === 0){
+          $json = substr($line, 6);
+          if($json === '[DONE]') return strlen($data);
+
+          $chunk = json_decode($json, true);
+          if(isset($chunk['choices'][0]['delta']['content'])){
+            $content = $chunk['choices'][0]['delta']['content'];
+            echo "data: " . json_encode(['type' => 'chunk', 'content' => $content]) . "\n\n";
+            if(ob_get_level()) ob_flush();
+            flush();
+          }
+        }
+      }
+      return strlen($data);
+    });
+    curl_exec($ch);
+    curl_close($ch);
+  } else {
+    // Fallback: file_get_contents doesn't support streaming well, so get full response
+    $context = stream_context_create([
+      'http' => [
+        'method' => 'POST',
+        'header' => "Authorization: Bearer $apiKey\r\nContent-Type: application/json\r\n",
+        'content' => json_encode($payload)
+      ]
+    ]);
+    $response = file_get_contents("https://api.openai.com/v1/chat/completions", false, $context);
+    $res = json_decode($response, true);
+    $content = $res['choices'][0]['message']['content'] ?? '';
+    echo "data: " . json_encode(['type' => 'chunk', 'content' => $content]) . "\n\n";
+    flush();
+  }
+}
+
+function streamClaude($apiKey, $model, $systemPrompt, $userMessage){
+  $payload = [
+    "model" => $model,
+    "max_tokens" => 4096,
+    "system" => $systemPrompt,
+    "messages" => [
+      ["role" => "user", "content" => $userMessage]
+    ],
+    "stream" => true
+  ];
+
+  if(function_exists('curl_init')){
+    $ch = curl_init("https://api.anthropic.com/v1/messages");
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "x-api-key: $apiKey",
+      "anthropic-version: 2023-06-01",
+      "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $data) {
+      // Parse SSE format
+      $lines = explode("\n", $data);
+      foreach($lines as $line){
+        if(strpos($line, 'data: ') === 0){
+          $json = substr($line, 6);
+          $chunk = json_decode($json, true);
+
+          // Claude streams different event types
+          if(isset($chunk['type']) && $chunk['type'] === 'content_block_delta'){
+            if(isset($chunk['delta']['text'])){
+              $content = $chunk['delta']['text'];
+              echo "data: " . json_encode(['type' => 'chunk', 'content' => $content]) . "\n\n";
+              if(ob_get_level()) ob_flush();
+              flush();
+            }
+          }
+        }
+      }
+      return strlen($data);
+    });
+    curl_exec($ch);
+    curl_close($ch);
+  } else {
+    // Fallback: file_get_contents doesn't support streaming
+    $context = stream_context_create([
+      'http' => [
+        'method' => 'POST',
+        'header' => "x-api-key: $apiKey\r\nanthropic-version: 2023-06-01\r\nContent-Type: application/json\r\n",
+        'content' => json_encode($payload)
+      ]
+    ]);
+    $response = file_get_contents("https://api.anthropic.com/v1/messages", false, $context);
+    $res = json_decode($response, true);
+    $content = $res['content'][0]['text'] ?? '';
+    echo "data: " . json_encode(['type' => 'chunk', 'content' => $content]) . "\n\n";
+    flush();
+  }
+}
+
 // Provider-specific API call functions
 function callOpenAI($apiKey, $model, $systemPrompt, $userMessage){
   $payload = [
@@ -873,26 +987,21 @@ if($isStreaming){
   ini_set('output_buffering', 'off');
   ini_set('zlib.output_compression', false);
 
-  // For streaming, we'll send the message first, then the structured response
   echo "data: " . json_encode(['type' => 'start']) . "\n\n";
   if(ob_get_level()) ob_flush();
   flush();
 
-  // Call LLM and get response
-  $aiMessage = callLLM($provider, $apiKey, $model, $contextPrompt, $data['message']);
+  // For streaming, use a simpler prompt that returns just the message
+  $streamPrompt = "You are lovelace, a conversational AI CMS. Respond naturally to the user's request. ";
+  $streamPrompt .= "Just provide a clear, helpful response about what you're doing. ";
+  $streamPrompt .= "Do NOT return JSON. Just plain conversational text.";
 
-  // Parse the response to extract just the message for streaming
-  $parsedResponse = json_decode($aiMessage, true);
-  $messageToStream = $aiMessage; // Default to full response
-
-  if($parsedResponse && isset($parsedResponse['message'])){
-    $messageToStream = $parsedResponse['message'];
+  // Real streaming from AI APIs
+  if($provider === 'openai'){
+    streamOpenAI($apiKey, $model, $streamPrompt, $data['message']);
+  } else if($provider === 'claude'){
+    streamClaude($apiKey, $model, $streamPrompt, $data['message']);
   }
-
-  // Send the complete message immediately (not real streaming - we get full response first)
-  echo "data: " . json_encode(['type' => 'chunk', 'content' => $messageToStream]) . "\n\n";
-  if(ob_get_level()) ob_flush();
-  flush();
 
   echo "data: " . json_encode(['type' => 'end']) . "\n\n";
   if(ob_get_level()) ob_flush();

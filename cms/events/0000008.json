@@ -1,0 +1,23 @@
+{
+    "id": "0000008",
+    "timestamp": "2023-10-25T12:45:00Z",
+    "actor": "ai-agent",
+    "instruction": "Add more testimonials",
+    "patches": [
+        {
+            "op": "create_collection_item",
+            "target": "testimonials",
+            "value": {
+                "name": "John",
+                "company": "Finded",
+                "role": "Developer",
+                "quote": "Best CMS of all time",
+                "rating": 5,
+                "photo": "[object File]"
+            }
+        }
+    ],
+    "previous_hash": "0270e758d4a3b865ac6c120571bc75c665d33475a7f2c133add92327635b17a1",
+    "hash": "5835b79c20c13a146d7e1fcea04faf830dc5f8289fe3f2e4489360e81cb2f416",
+    "signature": "d8901490fc29400916284ea803ef28c5d66a6a052a240382e0f30af58acd9af7"
+}
