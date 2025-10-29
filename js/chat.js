@@ -396,8 +396,9 @@ input.addEventListener('keydown', async (e) => {
         const suggestionItem = document.createElement('div');
         suggestionItem.className = 'suggestion-card';
 
-        const scorePercent = Math.round(suggestion.score * 100);
         const suggestionText = suggestion.suggestion || suggestion.message || 'Unknown suggestion';
+        const score = suggestion.score ?? 0.8; // Default to 80% if not provided
+        const scorePercent = Math.round(score * 100);
         suggestionItem.innerHTML = `
           <div class="flex items-center justify-between">
             <span class="font-medium text-gray-900">${index + 1}. ${suggestionText}</span>
