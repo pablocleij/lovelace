@@ -686,9 +686,10 @@ function writeEvent($event){
   ];
   $event['hash'] = hash('sha256', json_encode($hashData));
 
-  // Sign the event (using temporary key for now)
-  $key = sodium_crypto_sign_keypair();
-  $event['signature'] = base64_encode(sodium_crypto_sign_detached(json_encode($event), $key));
+  // Sign the event using HMAC-SHA256 (no extension required)
+  // Use a consistent secret key for signing (in production, use env variable)
+  $secretKey = 'lovelace-event-signing-key-' . ($_ENV['EVENT_SECRET'] ?? 'default-secret');
+  $event['signature'] = hash_hmac('sha256', json_encode($event), $secretKey);
 
   $id = $event['id'];
   file_put_contents("cms/events/$id.json", json_encode($event, JSON_PRETTY_PRINT));
