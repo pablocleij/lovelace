@@ -78,7 +78,7 @@ class EventService
             'actor' => $event['actor'],
             'instruction' => $event['instruction'],
             'patches' => $event['patches'],
-            'previous_hash' => $event['previous_hash']
+            'previous_hash' => $event['previous_hash'] ?? ''
         ];
 
         return hash('sha256', json_encode($hashData));

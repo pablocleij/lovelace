@@ -1,0 +1,12 @@
+{
+    "title": "Introduction to Our Blog",
+    "content": "Welcome to our brand new blog! Stay tuned for more updates.",
+    "summary": "An introduction to our blog and what you can expect from it.",
+    "author": "Admin",
+    "date": "2023-11-12",
+    "tags": [
+        "introduction",
+        "welcome"
+    ],
+    "featured_image": "path\/to\/image.jpg"
+}

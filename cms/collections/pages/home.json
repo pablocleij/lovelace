@@ -8,6 +8,12 @@
                 "subheading": "We're glad you're here",
                 "background_image": "\/path\/to\/image"
             }
+        },
+        {
+            "type": "recent_posts",
+            "title": "Recent Posts",
+            "collection": "blogs",
+            "limit": 3
         }
     ]
 }

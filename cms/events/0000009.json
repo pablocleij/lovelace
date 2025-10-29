@@ -1,0 +1,57 @@
+{
+    "id": "0000009",
+    "timestamp": "2023-11-12T10:18:45Z",
+    "actor": "ai-agent",
+    "instruction": "Add a blog with recent posts",
+    "patches": [
+        {
+            "op": "create_collection",
+            "target": "blogs",
+            "value": {
+                "fields": {
+                    "title": "string",
+                    "content": "string",
+                    "summary": "string",
+                    "author": "string",
+                    "date": "string",
+                    "tags": "list",
+                    "featured_image": "string"
+                }
+            }
+        },
+        {
+            "op": "create_collection_item",
+            "target": "blogs",
+            "value": {
+                "title": "Introduction to Our Blog",
+                "content": "Welcome to our brand new blog! Stay tuned for more updates.",
+                "summary": "An introduction to our blog and what you can expect from it.",
+                "author": "Admin",
+                "date": "2023-11-12",
+                "tags": [
+                    "introduction",
+                    "welcome"
+                ],
+                "featured_image": "path\/to\/image.jpg"
+            }
+        },
+        {
+            "op": "update_file",
+            "target": "collections\/pages\/home.json",
+            "value": {
+                "sections": [
+                    {
+                        "type": "recent_posts",
+                        "title": "Recent Posts",
+                        "collection": "blogs",
+                        "limit": 3
+                    }
+                ]
+            },
+            "merge": true
+        }
+    ],
+    "previous_hash": "0270e758d4a3b865ac6c120571bc75c665d33475a7f2c133add92327635b17a1",
+    "hash": "6b5a2ed86cd47528eaba8908e8ec89d6ce51d5c19e629652e334abf2859d2387",
+    "signature": "1fdc51ac06031cd83f7b000fdc3d64e861a63a6897923a0d34390f8e2ab80728"
+}

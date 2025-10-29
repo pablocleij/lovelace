@@ -1,5 +1,29 @@
 [
     {
+        "title": "Introduction to Our Blog",
+        "content": "Welcome to our brand new blog! Stay tuned for more updates.",
+        "summary": "An introduction to our blog and what you can expect from it.",
+        "author": "Admin",
+        "date": "2023-11-12",
+        "tags": [
+            "introduction",
+            "welcome"
+        ],
+        "featured_image": "path\/to\/image.jpg"
+    },
+    {
+        "title": "Introduction to Our Blog",
+        "content": "Welcome to our brand new blog! Stay tuned for more updates.",
+        "summary": "An introduction to our blog and what you can expect from it.",
+        "author": "Admin",
+        "date": "2023-11-12",
+        "tags": [
+            "introduction",
+            "welcome"
+        ],
+        "featured_image": "path\/to\/image.jpg"
+    },
+    {
         "name": "Tech",
         "posts": [
             {
@@ -16,6 +40,24 @@
             "name": "string",
             "posts": "list"
         }
+    },
+    {
+        "title": "Homepage",
+        "sections": [
+            "hero"
+        ]
+    },
+    {
+        "title": "Homepage",
+        "sections": [
+            "hero"
+        ]
+    },
+    {
+        "title": "Homepage",
+        "sections": [
+            "hero"
+        ]
     },
     {
         "title": "Homepage",
@@ -116,6 +158,12 @@
                     "subheading": "We're glad you're here",
                     "background_image": "\/path\/to\/image"
                 }
+            },
+            {
+                "type": "recent_posts",
+                "title": "Recent Posts",
+                "collection": "blogs",
+                "limit": 3
             }
         ]
     },
@@ -206,6 +254,66 @@
         "quote": "A truly outstanding experience from start to finish!",
         "rating": 5,
         "photo": "jane_smith.jpg"
+    },
+    {
+        "name": "Jane Doe",
+        "company": "TechCorp",
+        "quote": "Exceptional service and support!",
+        "rating": 5
+    },
+    {
+        "name": "John Doe",
+        "company": "Doe Enterprises",
+        "role": "CEO",
+        "quote": "This service was exceptional and exceeded our expectations.",
+        "rating": 5,
+        "photo": "john_doe.jpg"
+    },
+    {
+        "name": "Jane Smith",
+        "company": "Smith & Co",
+        "role": "Marketing Director",
+        "quote": "A truly outstanding experience from start to finish!",
+        "rating": 5,
+        "photo": "jane_smith.jpg"
+    },
+    {
+        "name": "John",
+        "company": "Finded",
+        "role": "Developer",
+        "quote": "Best CMS of all time",
+        "rating": 5,
+        "photo": "[object File]"
+    },
+    {
+        "name": "Jane Doe",
+        "company": "TechCorp",
+        "quote": "Exceptional service and support!",
+        "rating": 5
+    },
+    {
+        "name": "John Doe",
+        "company": "Doe Enterprises",
+        "role": "CEO",
+        "quote": "This service was exceptional and exceeded our expectations.",
+        "rating": 5,
+        "photo": "john_doe.jpg"
+    },
+    {
+        "name": "Jane Smith",
+        "company": "Smith & Co",
+        "role": "Marketing Director",
+        "quote": "A truly outstanding experience from start to finish!",
+        "rating": 5,
+        "photo": "jane_smith.jpg"
+    },
+    {
+        "name": "John",
+        "company": "Finded",
+        "role": "Developer",
+        "quote": "Best CMS of all time",
+        "rating": 5,
+        "photo": "[object File]"
     },
     {
         "name": "Jane Doe",
