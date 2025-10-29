@@ -1,0 +1,34 @@
+{
+    "event_id": "0000002",
+    "timestamp": "2025-10-28T23:57:24+00:00",
+    "instruction": "Create a homepage with a hero section",
+    "form": {
+        "fields": [
+            {
+                "label": "Homepage Title",
+                "name": "title",
+                "type": "string",
+                "value": "Homepage"
+            },
+            {
+                "label": "Hero Title",
+                "name": "sections[0].title",
+                "type": "string",
+                "value": "Welcome to Our Website"
+            },
+            {
+                "label": "Hero Subtitle",
+                "name": "sections[0].subtitle",
+                "type": "string",
+                "value": "We're glad to have you here!"
+            },
+            {
+                "label": "Background Image URL",
+                "name": "sections[0].background_image",
+                "type": "string",
+                "value": ""
+            }
+        ]
+    },
+    "submitted": false
+}

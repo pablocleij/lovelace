@@ -32,13 +32,22 @@ $apiConfig = json_decode(file_get_contents('cms/config/api_key.json'), true);
 $apiKey = $apiConfig['key'];
 $isEncrypted = $apiConfig['encrypted'] ?? false;
 
+// Check if API key is configured
+if(empty($apiKey) || $apiKey === 'YOUR_KEY_HERE'){
+  echo json_encode([
+    'error' => true,
+    'message' => 'API key not configured. Please click the 🔑 API button to set up your API key.'
+  ]);
+  exit;
+}
+
 // Decrypt key if encrypted
 if($isEncrypted){
   $apiKey = decryptKey($apiKey);
   if(!$apiKey){
     echo json_encode([
-      'error' => 'Failed to decrypt API key',
-      'message' => 'Please reconfigure your API key'
+      'error' => true,
+      'message' => 'Failed to decrypt API key. Please reconfigure your API key.'
     ]);
     exit;
   }
@@ -704,19 +713,39 @@ function callOpenAI($apiKey, $model, $systemPrompt, $userMessage){
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $apiKey", "Content-Type: application/json"]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    $res = json_decode(curl_exec($ch), true);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    $res = json_decode($response, true);
   } else {
     // Fallback: use file_get_contents with stream context
     $context = stream_context_create([
       'http' => [
         'method' => 'POST',
         'header' => "Authorization: Bearer $apiKey\r\nContent-Type: application/json\r\n",
-        'content' => json_encode($payload)
+        'content' => json_encode($payload),
+        'ignore_errors' => true
       ]
     ]);
     $response = file_get_contents("https://api.openai.com/v1/chat/completions", false, $context);
     $res = json_decode($response, true);
+    // Extract HTTP code from response headers
+    $httpCode = 200;
+    if(isset($http_response_header)){
+      preg_match('/HTTP\/\d\.\d\s+(\d+)/', $http_response_header[0], $matches);
+      $httpCode = intval($matches[1] ?? 200);
+    }
+  }
+
+  // Check for API errors
+  if(isset($res['error'])){
+    $errorMsg = $res['error']['message'] ?? 'Unknown OpenAI API error';
+    $errorType = $res['error']['type'] ?? 'api_error';
+    throw new Exception("OpenAI API Error ($errorType): $errorMsg");
+  }
+
+  if($httpCode !== 200){
+    throw new Exception("OpenAI API returned HTTP $httpCode");
   }
 
   return $res['choices'][0]['message']['content'] ?? '';
@@ -742,19 +771,39 @@ function callClaude($apiKey, $model, $systemPrompt, $userMessage){
     ]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-    $res = json_decode(curl_exec($ch), true);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    $res = json_decode($response, true);
   } else {
     // Fallback: use file_get_contents with stream context
     $context = stream_context_create([
       'http' => [
         'method' => 'POST',
         'header' => "x-api-key: $apiKey\r\nanthropic-version: 2023-06-01\r\nContent-Type: application/json\r\n",
-        'content' => json_encode($payload)
+        'content' => json_encode($payload),
+        'ignore_errors' => true
       ]
     ]);
     $response = file_get_contents("https://api.anthropic.com/v1/messages", false, $context);
     $res = json_decode($response, true);
+    // Extract HTTP code from response headers
+    $httpCode = 200;
+    if(isset($http_response_header)){
+      preg_match('/HTTP\/\d\.\d\s+(\d+)/', $http_response_header[0], $matches);
+      $httpCode = intval($matches[1] ?? 200);
+    }
+  }
+
+  // Check for API errors
+  if(isset($res['error'])){
+    $errorMsg = $res['error']['message'] ?? 'Unknown Anthropic API error';
+    $errorType = $res['error']['type'] ?? 'api_error';
+    throw new Exception("Anthropic API Error ($errorType): $errorMsg");
+  }
+
+  if($httpCode !== 200){
+    throw new Exception("Anthropic API returned HTTP $httpCode");
   }
 
   // Claude returns content in a different format
@@ -773,14 +822,16 @@ function callLLM($provider, $apiKey, $model, $systemPrompt, $userMessage){
   }
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+// Wrap main execution in try-catch to always return valid JSON
+try {
+  $data = json_decode(file_get_contents('php://input'), true);
 
-// Check if streaming is requested
-$isStreaming = $data['stream'] ?? false;
+  // Check if streaming is requested
+  $isStreaming = $data['stream'] ?? false;
 
-// Handle confirmed requests (bypass confirmation check)
-$isConfirmed = $data['confirmed'] ?? false;
-$pendingEvent = $data['pending_event'] ?? null;
+  // Handle confirmed requests (bypass confirmation check)
+  $isConfirmed = $data['confirmed'] ?? false;
+  $pendingEvent = $data['pending_event'] ?? null;
 
 if($isConfirmed && $pendingEvent){
   // User approved the action, write the pending event
@@ -993,11 +1044,29 @@ if(!empty($scoredSuggestions)){
 // AI-driven section recommendations
 $sectionSuggestions = $response['section_suggestions'] ?? [];
 
-echo json_encode([
-  'message'=>$response['message'],
-  'form'=>$response['form']??null,
-  'suggestions'=>$response['suggestions']??[],
-  'scored_suggestions'=>$scoredSuggestions,
-  'section_suggestions'=>$sectionSuggestions,
-  'error'=>$response['error']??null
-]);
+  echo json_encode([
+    'message'=>$response['message'],
+    'form'=>$response['form']??null,
+    'suggestions'=>$response['suggestions']??[],
+    'scored_suggestions'=>$scoredSuggestions,
+    'section_suggestions'=>$sectionSuggestions,
+    'error'=>$response['error']??null
+  ]);
+
+} catch (Exception $e) {
+  // Always return valid JSON even on errors
+  http_response_code(500);
+  echo json_encode([
+    'error' => true,
+    'message' => 'An error occurred: ' . $e->getMessage(),
+    'details' => $e->getFile() . ':' . $e->getLine()
+  ]);
+} catch (Error $e) {
+  // Catch fatal errors too
+  http_response_code(500);
+  echo json_encode([
+    'error' => true,
+    'message' => 'A fatal error occurred: ' . $e->getMessage(),
+    'details' => $e->getFile() . ':' . $e->getLine()
+  ]);
+}

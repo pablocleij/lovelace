@@ -160,6 +160,15 @@ async function streamAIResponse(msg){
       body: JSON.stringify({action: 'chat', message: msg})
     }).then(r => r.json());
 
+    // Check if the response contains an error
+    if(structuredRes && structuredRes.error){
+      contentDiv.innerHTML = `<div class="text-red-600"><strong>Error:</strong> ${structuredRes.message}</div>`;
+      if(structuredRes.details){
+        contentDiv.innerHTML += `<div class="text-xs text-gray-500 mt-2">${structuredRes.details}</div>`;
+      }
+      return structuredRes;
+    }
+
     // Parse and clean the response
     if(structuredRes && structuredRes.message){
       // If message is wrapped in JSON markdown, extract it
@@ -183,8 +192,8 @@ async function streamAIResponse(msg){
     return structuredRes;
 
   } catch(error){
-    contentDiv.textContent = 'Error: Could not connect to AI';
-    console.error(error);
+    contentDiv.innerHTML = '<div class="text-red-600"><strong>Error:</strong> Could not connect to AI. Please check your API key and network connection.</div>';
+    console.error('Connection error:', error);
     return null;
   }
 }
