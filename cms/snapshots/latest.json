@@ -18,6 +18,12 @@
         }
     },
     {
+        "title": "Homepage",
+        "sections": [
+            "hero"
+        ]
+    },
+    {
         "title": "About",
         "sections": [
             {

@@ -271,18 +271,34 @@ foreach($snap as $item){
   if(isset($item['sections'])){
     // Multi-section page with templates
     echo "<div class='page'>";
-    echo "<h1>{$item['title']}</h1>";
+    $title = $item['title'] ?? 'Untitled';
+    echo "<h1>{$title}</h1>";
     foreach($item['sections'] as $section){
+      // Handle legacy format where sections might be strings
+      if(is_string($section)){
+        $section = ['type' => $section];
+      }
+
+      // Skip if section is not an array (malformed data)
+      if(!is_array($section)){
+        continue;
+      }
+
       // Multi-collection linking: fetch referenced collection data
       if(isset($section['collection'])){
         $section['items'] = fetchCollection($section['collection'], $section['limit'] ?? null);
       }
-      echo renderTemplate($section['type'], $section);
+
+      // Only render if we have a type
+      if(isset($section['type'])){
+        echo renderTemplate($section['type'], $section);
+      }
     }
     echo "</div>";
   } else {
     // Simple page/item
-    echo "<section><h1>{$item['title']}</h1></section>";
+    $title = $item['title'] ?? 'Untitled';
+    echo "<section><h1>{$title}</h1></section>";
   }
 }
 
