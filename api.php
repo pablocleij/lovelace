@@ -91,9 +91,14 @@ function buildContext(){
   $context .= "    \"patches\": [{\"op\": \"operation\", \"target\": \"path\", \"value\": {}}]\n";
   $context .= "  },\n";
   $context .= "  \"form\": null or {\"fields\": []},\n";
-  $context .= "  \"scored_suggestions\": [],\n";
-  $context .= "  \"section_suggestions\": []\n";
+  $context .= "  \"scored_suggestions\": [{\"suggestion\": \"text\", \"score\": 0.0-1.0, \"reason\": \"why\"}],\n";
+  $context .= "  \"section_suggestions\": [{\"section_type\": \"type\", \"position\": \"after_X\", \"reason\": \"why\"}]\n";
   $context .= "}\n\n";
+  $context .= "SCORED_SUGGESTIONS FORMAT (REQUIRED):\n";
+  $context .= "Each item MUST have: {\"suggestion\": \"Add contact form\", \"score\": 0.95, \"reason\": \"Essential for user communication\"}\n";
+  $context .= "- suggestion: Clear actionable text (REQUIRED)\n";
+  $context .= "- score: Float between 0.0-1.0 indicating relevance (REQUIRED, NEVER omit)\n";
+  $context .= "- reason: Brief explanation why this helps (REQUIRED)\n\n";
   $context .= "CRITICAL: Return ONLY the raw JSON object. Do NOT wrap it in markdown code blocks (```json). Do NOT add any text before or after the JSON. Just pure JSON.\n";
   $context .= "NEVER return plain text. ALWAYS return valid JSON matching this structure.\n\n";
 
@@ -101,7 +106,7 @@ function buildContext(){
   $context .= "BEHAVIORAL RULES (CRITICAL):\n";
   $context .= "1. CONFIRMATION - Before destructive operations (delete, overwrite), set requires_confirmation: true\n";
   $context .= "2. CLARIFICATION - When user request is ambiguous, return a form with fields to gather needed info\n";
-  $context .= "3. SUGGESTIONS - After completing actions, suggest logical next steps in scored_suggestions array\n";
+  $context .= "3. SUGGESTIONS - ALWAYS provide 2-3 suggestions with score (0.0-1.0) and reason after completing actions\n";
   $context .= "4. REFLECTION - Analyze site structure and proactively suggest improvements\n";
   $context .= "5. EDUCATION - Explain WHY you're suggesting something in the reason field\n";
   $context .= "6. DYNAMIC COLLECTIONS - When user mentions content types not yet existing, create them automatically\n\n";
